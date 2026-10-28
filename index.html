@@ -1148,7 +1148,7 @@ function fromHash(){ const v = location.hash.slice(1); S = { view: VIEWS.include
 window.addEventListener('popstate', () => { fromHash(); render(); });
 window.addEventListener('hashchange', () => { fromHash(); render(); });
 
-const SITE = 'https://heiscool4u.github.io/hi-playground/';
+const SITE = 'https://hiplayground.kr/';
 function sharePage(){
   const say = msg => { const bb = document.querySelector('.bubble'); if (bb) bb.innerHTML = msg; };
   const show = () => say(`이 주소를 친구에게 보내 줘!<br><b>${SITE}</b>`);
