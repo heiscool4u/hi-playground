@@ -854,9 +854,9 @@ function aiLinks(){
     ? `<a class="game" href="${url}" target="_blank" rel="noopener">
     <span><b>${n}</b><small>${by} · 새 창으로 열려요</small></span></a>`
     : `<div class="game locked" aria-disabled="true">
-    <span><b>🔒 ${n}</b><small>${by} · 인증서를 받으면 열려요</small></span></div>`).join('');
+    <span><b>🔒 ${n}</b><small>${by} · 수업을 다 마치면 열려요</small></span></div>`).join('');
   const lead = open ? '배운 걸 진짜 AI에게 해 볼 차례야! 꼭 <b>엄마·아빠랑 같이</b> 골라서 써 봐.'
-    : `수업 10개를 모두 끝내고 <b>인증서</b>를 받으면 열려! 지금 <b>${done.length} / ${LESSONS.length}</b>`;
+    : `AI 교실 수업 10개를 모두 마치면 열려! 지금 <b>${done.length} / ${LESSONS.length}</b>`;
   return `<section class="arcade"><h2>진짜 AI 써 보기</h2>
     <p>${lead}</p>
     <div class="memo"><h3>쓰기 전에 약속</h3><ul>
