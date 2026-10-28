@@ -154,6 +154,21 @@ textarea{width:100%;box-sizing:border-box;min-height:110px;border:2px solid var(
 .game:hover{border-color:var(--coral)}
 @media (max-width:560px){.games{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
+/* 친구 점수판 */
+.board{margin-top:34px;display:flex;flex-direction:column;gap:12px}
+.board h2{font-size:26px}
+.board p{margin:0;color:var(--muted)}
+.ranks{list-style:none;margin:0;padding:0;background:var(--surface);border:2px solid var(--line);border-radius:18px;overflow:hidden}
+.ranks li{display:flex;gap:12px;align-items:center;padding:9px 14px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.ranks li:first-child{border-top:0}
+.ranks .no{width:26px;font-family:var(--display);color:var(--muted)}
+.ranks .nm{flex:1;min-width:0;overflow-wrap:anywhere}
+.ranks .sc{font-family:var(--display);font-size:18px}
+.ranks li.me{background:var(--sun-soft);color:var(--sun-ink)}
+.ranks .empty{color:var(--muted);justify-content:center}
+.nick{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.nick input{flex:1 1 160px;min-width:0;border:2px solid var(--line);border-radius:999px;padding:10px 16px;font:inherit;background:var(--surface);color:var(--ink)}
+
 /* 인증서·부모님 안내 */
 .cert{margin-top:26px;border:3px solid var(--sun);border-radius:24px;padding:22px;background:var(--surface);text-align:center}
 .cert h2{font-size:28px;color:var(--coral-deep)}
@@ -503,7 +518,7 @@ function home(){
   const arcade = `<section class="arcade"><h2>추억의 오락실</h2>
     <p>공부했으면 한 판! 키보드도 되고 화면 터치도 돼요.</p><div class="games">${games}</div></section>`;
 
-  return header() + stage(next === -1 ? 'cheer' : 'happy', say) + `<div class="map">${stops}</div>` + cert + arcade + `
+  return header() + stage(next === -1 ? 'cheer' : 'happy', say) + `<div class="map">${stops}</div>` + cert + arcade + boardHTML() + `
     <details class="parents"><summary>부모님께</summary><ul>
       <li>수업 하나는 3~5분이면 끝나요. 하루에 1~2개씩 함께 보시길 권해요.</li>
       <li>3·8·10번 수업에서 만든 질문은 복사해서 아이와 같이 실제 AI에 넣어 보세요.</li>
@@ -615,6 +630,7 @@ function updateWrite(){
 
 function render(){
   app.innerHTML = S.view === 'home' ? home() : lesson();
+  if (S.view === 'home' && B.rows === null && !B.loading){ B.loading = true; loadBoard().finally(() => { B.loading = false; }); }
   if (S.view === 'lesson' && S.phase === 'act' && LESSONS[S.li].act.type === 'write') updateWrite();
 }
 function openLesson(i){
@@ -678,6 +694,12 @@ app.addEventListener('click', e => {
     }
     case 'copy': return copyPrompt();
     case 'share': return sharePage();
+    case 'bgame': SND.play('pick'); B.game = d.g; B.rows = null; break;
+    case 'upload': return upload();
+    case 'roll':
+      SND.play('pick'); nick = rollNick(); B.msg = '';
+      try { localStorage.setItem(NICK_KEY, nick); } catch(e){}
+      break;
     case 'finish':
       SND.play('star');
       if (!done.includes(S.li)) { done.push(S.li); save(); }
@@ -690,8 +712,7 @@ app.addEventListener('click', e => {
 });
 
 app.addEventListener('input', e => {
-  if (e.target.id === 'my-q'){ S.text = e.target.value; updateWrite(); }
-});
+  if (e.target.id === 'my-q'){ S.text = e.target.value; updateWrite(); }});
 
 function copyPrompt(){
   const ta = document.getElementById('my-q');
@@ -707,6 +728,78 @@ function copyPrompt(){
   try {
     navigator.clipboard.writeText(text).then(() => say('복사했어! AI 채팅창에 붙여 넣어 봐.'), fallback);
   } catch(e){ fallback(); }
+}
+
+/* ---------- 친구 점수판 (Supabase, 공개용 키라 페이지에 있어도 됨. 권한은 DB 정책이 막는다) ---------- */
+const SB_URL = 'https://burajsyrifmlptwatcqg.supabase.co/rest/v1';
+const SB_KEY = 'sb_publishable_iO016BuOqDxQXtjfSCKCzw_3thXSBtk';
+// 지뢰 찾기는 시간 기록(낮을수록 좋음)이라 점수판에서 뺀다
+const BOARD = [['stars','수업 별','bs.none']].concat(
+  [['01-block-stack','bs.scores.'],['02-star-fleet','ra-02-scores'],['03-maze-muncher','ra-03-scores'],['04-brick-break','ra-04-scores'],
+   ['05-sky-ace','ra-05-scores'],['06-snake','ra-06-scores'],['08-frog-road','ra-08-scores'],['09-cave-runner','ra-09-scores']]
+  .map(([id, key]) => [id, GAMES.find(g => g[0] === id)[1], key]));
+// 별명은 뽑기로만 정한다(실명·연락처가 들어갈 틈을 없앰). DB도 같은 조합만 받는다
+const ADJ = ['용감한','신나는','반짝이는','졸린','배고픈','씩씩한','수줍은','날쌘','똑똑한','엉뚱한','행복한','꼬마'];
+const ANI = ['수달','펭귄','다람쥐','고양이','강아지','토끼','판다','여우','고래','공룡','부엉이','햄스터'];
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const rollNick = () => `${pick(ADJ)} ${pick(ANI)} ${1 + Math.floor(Math.random() * 99)}`;
+const NICK_KEY = 'hi-playground-nick', SENT_KEY = 'hi-playground-sent';
+let nick = '', sent = {};
+try { nick = localStorage.getItem(NICK_KEY) || ''; sent = JSON.parse(localStorage.getItem(SENT_KEY)) || {}; } catch(e){}
+const B = { game:'stars', rows:null, msg:'' };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function localBest(id, prefix){
+  if (id === 'stars') return done.length;
+  let best = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if (!k.startsWith(prefix)) continue;
+      for (const e of JSON.parse(localStorage.getItem(k)) || []) best = Math.max(best, Math.floor(+e.s) || 0);
+    }
+  } catch(e){}
+  return best;
+}
+function boardHTML(){
+  const tabs = BOARD.map(([id, name]) => `<button class="chip ${B.game === id ? 'on' : ''}" data-a="bgame" data-g="${id}">${name}</button>`).join('');
+  let list;
+  if (B.rows === null) list = '<li class="empty">불러오는 중…</li>';
+  else if (!B.rows) list = '<li class="empty">점수판을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.</li>';
+  else if (!B.rows.length) list = '<li class="empty">아직 기록이 없어요. 첫 번째 주인공이 되어 봐!</li>';
+  else list = B.rows.map((r, i) => `<li class="${r.nickname === nick ? 'me' : ''}"><span class="no">${i+1}</span><span class="nm">${esc(r.nickname)}</span><span class="sc">${esc(r.score)}</span></li>`).join('');
+  return `<section class="board"><h2>친구 점수판</h2>
+    <p>별명을 뽑고 내 최고 기록을 올려 봐! 친구에게 내 별명을 알려 주면 서로 찾을 수 있어.</p>
+    <div class="chips">${tabs}</div><ol class="ranks">${list}</ol>
+    <div class="nick"><span class="disp" style="font-size:20px">${nick ? '내 별명: ' + esc(nick) : '아직 별명이 없어요'}</span>
+      <button class="btn ghost" data-a="roll">${nick ? '다시 뽑기' : '별명 뽑기'}</button>
+      <button class="btn" data-a="upload">내 기록 올리기</button></div>
+    <p class="small" id="board-msg" aria-live="polite">${esc(B.msg)}</p></section>`;
+}
+async function sb(path, opt = {}){
+  const r = await fetch(SB_URL + path, Object.assign({ headers:{ apikey:SB_KEY, 'Content-Type':'application/json', Prefer:'return=minimal' } }, opt));
+  if (!r.ok) throw new Error(r.status);
+  return r.status === 204 || r.status === 201 ? null : r.json();
+}
+async function loadBoard(){
+  try { B.rows = await sb(`/top_scores?select=nickname,score&game=eq.${encodeURIComponent(B.game)}&order=score.desc&limit=10`); }
+  catch(e){ B.rows = false; }
+  if (S.view === 'home') render();
+}
+async function upload(){
+  const n = nick.trim();
+  if (!n) { B.msg = '먼저 별명을 뽑아 줘!'; return render(); }
+  const rows = BOARD.map(([id, , key]) => ({ nickname:n, game:id, score:localBest(id, key) }))
+    .filter(r => r.score > 0 && r.score > (sent[n + '|' + r.game] || 0));
+  if (!rows.length) { B.msg = '새로 올릴 기록이 없어. 수업을 하거나 게임을 한 판 해 봐!'; return render(); }
+  B.msg = '올리는 중…'; render();
+  try {
+    await sb('/scores', { method:'POST', body:JSON.stringify(rows) });
+    rows.forEach(r => { sent[n + '|' + r.game] = r.score; });
+    try { localStorage.setItem(SENT_KEY, JSON.stringify(sent)); } catch(e){}
+    B.msg = `기록 ${rows.length}개를 올렸어!`; SND.play('star');
+  } catch(e){ B.msg = '올리지 못했어. 잠시 뒤에 다시 해 봐.'; }
+  B.rows = null; render(); loadBoard();
 }
 
 const SITE = 'https://heiscool4u.github.io/hi-playground/';
