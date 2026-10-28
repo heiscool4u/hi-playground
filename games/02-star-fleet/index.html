@@ -1,0 +1,1103 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>별빛 편대 | 추억의 오락실</title>
+<meta name="description" content="그 시절 오락실 우주 편대 슈팅을 브라우저에서. PC 키보드와 모바일 터치 모두 지원합니다.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="별빛 편대 | 추억의 오락실">
+<meta property="og:description" content="곡선을 그리며 급강하하는 외계 편대, 대장 적의 포획 광선까지. PC·모바일 모두 됩니다.">
+<meta property="og:url" content="https://heiscool4u.github.io/retro-arcade/games/02-star-fleet/">
+<meta property="og:image" content="https://heiscool4u.github.io/retro-arcade/games/02-star-fleet/og.png">
+<meta name="theme-color" content="#0a0c18">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
+<style>
+:root{
+  --bg:#0a0c18; --bezel:#161a33; --line:#343a74; --ink:#eef0ff; --dim:#8d93c4;
+  --yellow:#ffd84a; --red:#e8455a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none}
+body{
+  background:radial-gradient(ellipse at 50% 0%,#1b2046 0%,var(--bg) 62%) fixed,var(--bg);
+  color:var(--ink);font-family:Galmuri11,monospace;word-break:keep-all;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+}
+button{touch-action:manipulation}
+#app{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.logo{font-size:13px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo b{color:var(--yellow);font-weight:400}
+.logo .home{color:inherit;text-decoration:none}
+.logo .home:hover{color:var(--ink);text-decoration:underline}
+.tb{display:flex;gap:6px}
+.icon{font:inherit;font-size:12px;min-width:44px;height:30px;color:var(--ink);background:var(--bezel);
+  border:2px solid var(--line);border-radius:4px;cursor:pointer}
+.icon[aria-pressed="true"]{color:var(--dim);text-decoration:line-through}
+#stage{position:relative}
+canvas{display:block;border-radius:6px;touch-action:none;box-shadow:0 0 0 3px #20254a,0 10px 40px rgba(0,0,0,.6)}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:auto;
+  background:rgba(6,7,16,.87);border-radius:6px;padding:12px;font-size:clamp(11px,2.4vw,17px)}
+.hidden{display:none!important}
+.scr{width:100%;max-width:26em;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.8em}
+h1{margin:0;font-family:Galmuri14,Galmuri11,monospace;font-weight:400;font-size:2em;line-height:1.15;letter-spacing:.06em;
+  text-shadow:.08em .08em 0 #000}
+p{margin:0}
+.sub{color:var(--dim)}
+.row{display:flex;align-items:center;justify-content:center;gap:.5em;flex-wrap:wrap}
+.k{color:var(--dim);margin-right:.2em}
+.btn{font:inherit;color:var(--ink);background:#23284c;border:2px solid #4a5196;border-bottom-width:4px;
+  border-radius:4px;padding:.45em .8em;cursor:pointer}
+.btn:active{transform:translateY(2px);border-bottom-width:2px}
+.btn.sel{background:var(--yellow);color:#1a1400;border-color:#b3902a}
+.desc{color:var(--dim);font-size:.9em;min-height:2.7em;line-height:1.35}
+.start{font-size:1.4em;background:var(--red);border-color:#8e2232;padding:.3em 1.3em}
+#btnStart{animation:blink 1.1s steps(2) infinite}
+@keyframes blink{50%{opacity:.55}}
+.big{font-size:2em;color:var(--yellow);text-shadow:.08em .08em 0 #000}
+.stat{display:grid;grid-template-columns:auto auto auto auto;gap:.25em .8em;margin:0}
+.stat dt{color:var(--dim)} .stat dd{margin:0;text-align:right}
+ol.rank{margin:0;padding:0;list-style:none;width:100%;max-width:17em}
+ol.rank li{display:flex;justify-content:space-between;padding:.12em .5em}
+ol.rank li.me{background:var(--yellow);color:#1a1400}
+.keys{color:var(--dim);font-size:.85em;line-height:1.6}
+.help{color:var(--dim);font-size:12px;text-align:center;line-height:1.9;max-width:760px;margin:0}
+.help kbd{font-family:inherit;color:var(--ink);background:var(--bezel);border:1px solid var(--line);
+  border-bottom-width:2px;border-radius:3px;padding:0 .35em}
+/* 터치 패드: 좌우 이동 + 발사 */
+#pad{display:none;width:100%;max-width:420px;justify-content:space-between;align-items:center;touch-action:none}
+body.touch #pad{display:flex}
+body.touch .help{display:none}
+.pb{font:inherit;color:var(--ink);background:#262b50;border:2px solid #4a5196;border-bottom-width:5px;
+  border-radius:8px;font-size:20px;touch-action:none;padding:0;cursor:pointer}
+.pb.on{transform:translateY(3px);border-bottom-width:2px;filter:brightness(1.25)}
+.side{display:flex;gap:10px}
+.side .pb{width:min(58px,15vw);height:min(58px,15vw)}
+.mid{display:flex;flex-direction:column;gap:8px;align-items:center}
+.pill{width:min(64px,16vw);height:26px;border-radius:13px;font-size:10px}
+.fire{width:min(76px,19vw);height:min(76px,19vw);border-radius:50%;font-size:14px;
+  background:#b8324a;border-color:#6e1c2c}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="hdr">
+    <div class="logo"><b>STAR FLEET</b> · <a href="../../" class="home">추억의 오락실</a></div>
+    <div class="tb">
+      <button class="icon" id="btnPause" title="일시정지 (P)">II</button>
+      <button class="icon" id="btnMute" title="소리 켜기/끄기 (M)" aria-pressed="false">♪</button>
+    </div>
+  </header>
+
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div class="overlay" id="ov">
+      <section class="scr" id="scrTitle">
+        <h1><span style="color:#3ad6c8">별</span><span style="color:#ffe14a">빛</span> <span style="color:#e057c9">편</span><span style="color:#4ad8ff">대</span></h1>
+        <p class="sub">추억의 오락실 · 우주 편대 슈팅</p>
+        <div class="row"><span class="k">난이도</span>
+          <button class="btn" data-diff="easy">쉬움</button>
+          <button class="btn" data-diff="normal">보통</button>
+          <button class="btn" data-diff="hard">어려움</button>
+        </div>
+        <p class="desc" id="diffDesc"></p>
+        <button class="btn start" id="btnStart">START</button>
+        <p class="sub" id="bestLine"></p>
+        <p class="keys" id="titleKeys"></p>
+      </section>
+
+      <section class="scr hidden" id="scrPause">
+        <p class="big">PAUSE</p>
+        <div class="row">
+          <button class="btn" data-tg="bgm"></button>
+          <button class="btn" data-tg="sfx"></button>
+        </div>
+        <button class="btn start" id="btnResume">계속하기</button>
+        <button class="btn" id="btnQuit">처음 화면으로</button>
+      </section>
+
+      <section class="scr hidden" id="scrStage">
+        <p class="big" id="stageTitle"></p>
+        <p id="stageBonus"></p>
+        <p class="desc" id="stageNext"></p>
+        <button class="btn start" id="btnNext">다음 스테이지</button>
+      </section>
+
+      <section class="scr hidden" id="scrOver">
+        <p class="big">GAME OVER</p>
+        <p id="overMsg"></p>
+        <dl class="stat" id="overStat"></dl>
+        <ol class="rank" id="overRank"></ol>
+        <div class="row">
+          <button class="btn start" id="btnRetry">다시 하기</button>
+          <button class="btn" id="btnTitle">처음 화면</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="pad">
+    <div class="side">
+      <button class="pb" data-act="left" tabindex="-1" aria-label="왼쪽">◀</button>
+      <button class="pb" data-act="right" tabindex="-1" aria-label="오른쪽">▶</button>
+    </div>
+    <div class="mid">
+      <button class="pb pill" data-act="pause" tabindex="-1">PAUSE</button>
+    </div>
+    <button class="pb fire" data-act="fire" tabindex="-1" aria-label="발사">FIRE</button>
+  </div>
+
+  <p class="help" id="help">
+    <kbd>←</kbd> <kbd>→</kbd> 이동 · <kbd>Space</kbd> 발사 ·
+    <kbd>P</kbd> 일시정지 · <kbd>M</kbd> 소리
+  </p>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+// ================= 화면(가상 해상도) =================
+const VW = 240, VH = 340, TOPH = 20, BOTH = 20;      // 위/아래 HUD 띠 높이
+const PLAY_Y0 = TOPH, PLAY_Y1 = VH - BOTH;
+const CX = VW / 2;
+const PLAYER_Y = PLAY_Y1 - 24;
+const PX = 2; // 스프라이트 도트 1개의 가상 픽셀 크기
+
+// ================= 규칙 상수 =================
+const ROWSPEC = [ // 편대 대열: 대장 4기 + 3종 각 8기
+  { type: 'Q', count: 4, y: PLAY_Y0 + 36, gap: 48 },
+  { type: 'C', count: 8, y: PLAY_Y0 + 60, gap: 24 },
+  { type: 'P', count: 8, y: PLAY_Y0 + 84, gap: 24 },
+  { type: 'J', count: 8, y: PLAY_Y0 + 108, gap: 24 },
+];
+const SCORE = { J: { form: 50, dive: 100 }, P: { form: 80, dive: 160 }, C: { form: 100, dive: 200 }, Q: { form: 300, dive: 600 } };
+const BONUS_HIT_SCORE = 150, BONUS_PERFECT = 5000;
+const PLAYER_SPEED = 120, PLAYER_MAX_BULLETS = 2, FIRE_COOLDOWN = 170;
+const CAPTURE_CHANCE = 0.32, CAPTURE_RADIUS = 15, BEAM_MS = 800, HOVER_GAP = 46, CAPTURE_COOLDOWN_MS = 8000;
+const RESPAWN_MS = 650, INVULN_MS = 1500, DUAL_INVULN_MS = 800;
+const DIFF = {
+  easy:   { lives: 4, diveMult: 1.3, speedMult: 0.9,  bulletMult: 0.85, label: '적이 느리고 덜 쏩니다. 처음이라면 이걸로.' },
+  normal: { lives: 3, diveMult: 1,   speedMult: 1,    bulletMult: 1,    label: '오락실 표준 난이도.' },
+  hard:   { lives: 3, diveMult: 0.7, speedMult: 1.15, bulletMult: 1.2,  label: '급강하가 잦고 빠릅니다. 실력에 자신 있다면.' },
+};
+const FIRST_1UP = 15000, NEXT_1UP = 40000, MAX_LIVES_SHOWN = 6;
+
+// ================= 도트 스프라이트 (전부 새로 디자인한 독자 캐릭터) =================
+const SPR = {
+  ship: [ // 가오리형 우주선(플레이어)
+    "....1....",
+    "...111...",
+    "..11211..",
+    ".1111111.",
+    "11.111.11",
+    "1.......1",
+    "11.....11",
+  ],
+  J: [ // 해파리형 외계 생물(반투명 종 모양 몸통 + 물결치는 촉수, 최약체·편대 뒷줄)
+    "..111..",
+    ".11111.",
+    "1112111",
+    ".11111.",
+    "..1.1..",
+    ".1...2.",
+    "1.....1",
+    ".2...1.",
+    "...1...",
+  ],
+  P: [ // 포자체(가시 알갱이, 중간)
+    "...1...",
+    ".1.1.1.",
+    "..222..",
+    "1.22221",
+    "..222..",
+    ".1.1.1.",
+    "...1...",
+  ],
+  C: [ // 수정 결정체 (상위)
+    "...1...",
+    "..111..",
+    ".12221.",
+    "1222221",
+    "1222221",
+    ".12221.",
+    "..111..",
+    "...1...",
+  ],
+  Q: [ // 뿔 달린 왕관형 결정핵(대장, 2방 격추, 첫 피격에 색이 바뀐다) - 다리 없이 위로 뻗은 뿔 + 둥근 보석 몸통
+    "1...........1",
+    ".1.........1.",
+    "..1.......1..",
+    "...1222221...",
+    "..122222221..",
+    ".12222222221.",
+    ".12222222221.",
+    "..122222221..",
+    "...1222221...",
+  ],
+};
+const PAL = {
+  ship: { 1: '#3ad6c8', 2: '#ffe14a' },
+  shipDim: { 1: '#1c6e66', 2: '#8a7a26' },
+  J: { 1: '#ae6fe0', 2: '#f5e6ff' },
+  P: { 1: '#f5a23a', 2: '#c9531a' },
+  C: { 1: '#4ad8ff', 2: '#d8f6ff' },
+  Q: { 1: '#e057c9', 2: '#ffd0f0' },
+  Qcrack: { 1: '#57e0a0', 2: '#e0fff0' },
+};
+const spriteW = t => SPR[t][0].length * PX, spriteH = t => SPR[t].length * PX;
+
+// ================= 저장 =================
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* 저장 불가 환경: 무시 */ } },
+};
+const settings = Object.assign({ diff: 'normal', bgm: true, sfx: true, muted: false }, store.get('ra-02-settings', {}));
+const saveSettings = () => store.set('ra-02-settings', settings);
+
+// ================= 사운드 (Web Audio로 직접 합성) =================
+const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
+// 로시니 '윌리엄 텔 서곡' 피날레(1829, 퍼블릭 도메인 - 로시니 1868년 사망)의
+// 특징적인 "다다-단" 갤럽 리듬과 으뜸음-딸림음을 오가는 트라이어드 팡파르를 본떠 만든
+// 8비트 편곡(원곡 그대로의 채보 아님)
+const GALLOP = [0, 0, 7, 0, 0, 7, 12, 7];
+const GBEAT = [.33, .33, .67, .33, .33, .67, .5, .5];
+const ROOTS_MEL = [48, 48, 55, 55]; // C3, C3, G3, G3 - 으뜸-딸림을 오가며 상행
+const MELODY = ROOTS_MEL.flatMap(r => GALLOP.map((o, i) => [r + o + 12, GBEAT[i]]));
+const BASS = ROOTS_MEL.flatMap(r => [[r, .5], [r, .5], [r + 7, .5], [r, .5]]);
+
+const Sound = {
+  ctx: null, out: null, bgmBus: null, timer: null, tracks: null,
+  bgmOn: true, sfxOn: true, muted: false, danger: false,
+  init() {
+    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    this.ctx = new AC();
+    this.out = this.ctx.createGain();
+    this.out.gain.value = this.muted ? 0 : 0.8;
+    this.out.connect(this.ctx.destination);
+    this.bgmBus = this.ctx.createGain();
+    this.bgmBus.connect(this.out);
+  },
+  note(freq, t, dur, type, vol, dest, slideTo) {
+    const c = this.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.006);
+    g.gain.setValueAtTime(vol, t + dur * 0.6);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest || this.out);
+    o.start(t); o.stop(t + dur + 0.03);
+  },
+  seq(freqs, t, step, type = 'square', vol = 0.06) { freqs.forEach((f, i) => this.note(f, t + i * step, step * 1.2, type, vol)); },
+  sfx(name, delay = 0) {
+    if (!this.ctx || !this.sfxOn || this.muted) return;
+    const f = SFX[name];
+    if (f) f(this, this.ctx.currentTime + delay);
+  },
+  bgmStart(delay = 0.08) {
+    if (!this.ctx || !this.bgmOn || this.muted || this.timer) return;
+    const now = this.ctx.currentTime, t0 = now + delay;
+    this.bgmBus.gain.cancelScheduledValues(now);
+    this.bgmBus.gain.setValueAtTime(1, now);
+    this.tracks = [
+      { seq: MELODY, i: 0, t: t0, type: 'square', vol: 0.04, gate: 0.85 },
+      { seq: BASS, i: 0, t: t0, type: 'triangle', vol: 0.11, gate: 0.7 },
+    ];
+    const tick = () => {
+      const at = this.ctx.currentTime, spb = 60 / (this.danger ? 200 : 150);
+      for (const tr of this.tracks) {
+        while (tr.t < at + 0.2) {
+          const [m, beats] = tr.seq[tr.i], d = beats * spb;
+          if (m) this.note(midiHz(m), tr.t, d * tr.gate, tr.type, tr.vol, this.bgmBus);
+          tr.t += d;
+          tr.i = (tr.i + 1) % tr.seq.length;
+        }
+      }
+    };
+    tick();
+    this.timer = setInterval(tick, 40);
+  },
+  bgmStop() {
+    if (!this.timer) return;
+    clearInterval(this.timer);
+    this.timer = null;
+    const now = this.ctx.currentTime;
+    this.bgmBus.gain.cancelScheduledValues(now);
+    this.bgmBus.gain.setValueAtTime(this.bgmBus.gain.value, now);
+    this.bgmBus.gain.linearRampToValueAtTime(0, now + 0.05);
+  },
+  setMuted(m) { this.muted = m; if (this.out) this.out.gain.value = m ? 0 : 0.8; if (m) this.bgmStop(); },
+};
+const SFX = {
+  shoot:   (s, t) => s.note(760, t, 0.05, 'square', 0.035, null, 1200),
+  hit:     (s, t) => s.note(180, t, 0.05, 'square', 0.05, null, 90),
+  crack:   (s, t) => s.seq([700, 500], t, 0.05, 'square', 0.05),
+  explode: (s, t) => { s.note(220, t, 0.16, 'square', 0.07, null, 40); s.note(90, t, 0.22, 'triangle', 0.16, null, 30); },
+  pexplode:(s, t) => { s.seq([440, 330, 220, 150, 100], t, 0.06, 'square', 0.08); },
+  beam:    (s, t) => s.note(120, t, 0.7, 'sawtooth', 0.05, null, 900),
+  capture: (s, t) => s.seq([700, 500, 350, 200], t, 0.09, 'sawtooth', 0.07),
+  rescue:  (s, t) => s.seq([400, 500, 640, 800, 1000], t, 0.06, 'square', 0.07),
+  oneup:   (s, t) => s.seq([523, 659, 784, 1047, 1319], t, 0.07),
+  stage:   (s, t) => s.seq([523, 523, 523, 659, 587, 659, 784, 1047], t, 0.1, 'square', 0.06),
+  perfect: (s, t) => s.seq([784, 988, 1175, 1568, 1975], t, 0.09, 'square', 0.08),
+  pause:   (s, t) => s.seq([988, 1319], t, 0.07),
+  start:   (s, t) => s.seq([262, 330, 392, 523, 659, 784], t, 0.05),
+  select:  (s, t) => s.note(880, t, 0.04, 'square', 0.035),
+  over:    (s, t) => s.seq([523, 494, 466, 440, 415, 392, 370, 349, 330, 311], t, 0.1, 'square', 0.055),
+};
+
+// ================= 게임 상태 (헤드리스 검증이 이 줄을 치환한다) =================
+const G = {
+  state: 'title', prev: null, difficulty: settings.diff,
+  stage: 1, bonusStage: false, bonusHits: 0, bonusTotal: 0,
+  score: 0, lives: 3, best: 0, next1up: FIRST_1UP,
+  player: { x: CX, y: PLAYER_Y, dual: false, state: 'alive', respawnT: 0, invuln: 0 },
+  enemies: [], playerBullets: [], enemyBullets: [], particles: [], popups: [], rescue: null,
+  diveTimer: 1600, captureCooldown: 0, formPhase: 0, breathPhase: 0,
+  stageBannerT: 0, time: 0, overShown: false, recordShown: false, rank: -1, danger: false,
+};
+
+// ================= 유틸 =================
+const rnd = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = t => t * t * (3 - 2 * t);
+function bez(p0, p1, p2, p3, t) {
+  const u = 1 - t, a = u * u * u, b = 3 * u * u * t, c = 3 * u * t * t, d = t * t * t;
+  return { x: a * p0.x + b * p1.x + c * p2.x + d * p3.x, y: a * p0.y + b * p1.y + c * p2.y + d * p3.y };
+}
+const rectHit = (ax, ay, aw, ah, bx, by, bw, bh) =>
+  Math.abs(ax - bx) < (aw + bw) / 2 && Math.abs(ay - by) < (ah + bh) / 2;
+const dm = () => DIFF[G.difficulty];
+
+function diveInterval() { return Math.max(900, 2600 - (G.stage - 1) * 140) * dm().diveMult; }
+function fireInterval() { return Math.max(500, 1400 - (G.stage - 1) * 60) * dm().diveMult; }
+function speedMult() { return Math.min(1.9, 1 + (G.stage - 1) * 0.05) * dm().speedMult; }
+function enemyBulletCap() { return Math.min(9, 3 + Math.floor((G.stage - 1) / 2)); }
+function maxDivers() { return Math.min(4, 1 + Math.floor((G.stage - 1) / 3)); }
+function hasCarrier() { return G.enemies.some(e => e.carrying); }
+
+// ================= 편대 구성 =================
+function buildFormation() {
+  const list = [];
+  ROWSPEC.forEach((row, ri) => {
+    const step = row.count === 4 ? 150 : 90;
+    for (let i = 0; i < row.count; i++) {
+      const x = CX + (i - (row.count - 1) / 2) * row.gap;
+      list.push({
+        type: row.type, hp: row.type === 'Q' ? 2 : 1, cracked: false,
+        col: i, row: ri, side: i < row.count / 2 ? -1 : 1,
+        baseSlot: { x, y: row.y }, x, y: row.y,
+        state: 'wait', delay: ri * 750 + i * step,
+        carrying: false,
+      });
+    }
+  });
+  return list;
+}
+function buildBonusWaves() {
+  const list = [];
+  const types = ['J', 'P', 'C'];
+  for (let w = 0; w < 3; w++) {
+    for (let i = 0; i < 8; i++) {
+      const x = CX + (i - 3.5) * 24, y = PLAY_Y0 + 40 + w * 26;
+      list.push({
+        type: types[w], hp: 1, cracked: false, col: i, row: w, side: i < 4 ? -1 : 1,
+        baseSlot: { x, y }, x, y, state: 'wait', delay: w * 900 + i * 100, carrying: false, bonus: true,
+      });
+    }
+  }
+  return list;
+}
+
+// ================= 진입 경로 =================
+function startEntry(e, exit) {
+  const side = e.side, startY = 12 + e.row * 5;
+  const p0 = { x: side < 0 ? -16 : VW + 16, y: startY };
+  const p1 = { x: CX + side * 56, y: PLAY_Y0 + (PLAY_Y1 - PLAY_Y0) * 0.42 };
+  const target = e.baseSlot;
+  const p2 = exit ? { x: target.x, y: target.y - 16 } : { x: target.x, y: target.y - 44 };
+  const p3 = exit ? { x: target.x + side * 30, y: VH + 20 } : target;
+  e.entry = { p0, p1, p2, p3, t: 0, dur: exit ? 2000 : 1500, exit };
+  e.state = 'enter';
+}
+function updateEntry(e, dt) {
+  e.entry.t += dt;
+  const t = Math.min(1, e.entry.t / e.entry.dur);
+  const pos = bez(e.entry.p0, e.entry.p1, e.entry.p2, e.entry.p3, smooth(t));
+  e.x = pos.x; e.y = pos.y;
+  if (t >= 1) {
+    if (e.entry.exit) removeFromArray(G.enemies, e); // 보너스 스테이지: 맞히지 못하고 통과
+    else e.state = 'formation';
+  }
+}
+function removeFromArray(arr, e) { const i = arr.indexOf(e); if (i >= 0) arr.splice(i, 1); }
+
+// ================= 편대 대형 움직임 =================
+function updateFormation(dt) {
+  G.formPhase += dt * 0.0011; G.breathPhase += dt * 0.0007;
+  const sway = Math.sin(G.formPhase) * 9;
+  const spread = 1 + Math.sin(G.breathPhase) * 0.13;
+  for (const e of G.enemies) {
+    if (e.state !== 'formation') continue;
+    e.x = CX + (e.baseSlot.x - CX) * spread + sway;
+    e.y = e.baseSlot.y + Math.sin(G.formPhase * 1.6 + e.col) * 2;
+  }
+}
+
+// ================= 급강하 =================
+function pickDiver() {
+  const pool = G.enemies.filter(e => e.state === 'formation');
+  if (!pool.length) return null;
+  return pool[(Math.random() * pool.length) | 0];
+}
+function tryStartDive() {
+  const diving = G.enemies.filter(e => e.state === 'diving').length;
+  if (diving >= maxDivers()) return;
+  const e = pickDiver();
+  if (!e) return;
+  if (e.type === 'Q' && G.captureCooldown <= 0 && !G.player.dual && !hasCarrier() && Math.random() < CAPTURE_CHANCE) {
+    startCaptureDive(e);
+  } else {
+    startAttackDive(e);
+  }
+}
+function startAttackDive(e) {
+  e.state = 'diving'; e.diveKind = 'attack';
+  const side = e.x < CX ? 1 : -1;
+  const px = G.player.x;
+  e.dive = {
+    p0: { x: e.x, y: e.y }, p1: { x: e.x + side * 60, y: e.y + 70 },
+    p2: { x: px + rnd(-30, 30), y: VH * 0.75 }, p3: { x: px + rnd(-40, 40), y: VH + 24 },
+    t: 0, dur: 1500 / speedMult(),
+  };
+  e.fireTimer = rnd(250, 500);
+}
+function startCaptureDive(e) {
+  G.captureCooldown = CAPTURE_COOLDOWN_MS;
+  e.state = 'diving'; e.diveKind = 'capture'; e.capPhase = 'descend';
+  const hx = clamp(G.player.x, 30, VW - 30), hy = G.player.y - HOVER_GAP;
+  e.dive = {
+    p0: { x: e.x, y: e.y }, p1: { x: e.x, y: e.y + 60 },
+    p2: { x: hx, y: hy - 40 }, p3: { x: hx, y: hy }, t: 0, dur: 1100 / speedMult(),
+  };
+  Sound.sfx('beam', 0.15);
+}
+function startReturn(e) {
+  e.state = 'returning';
+  e.ret = {
+    p0: { x: e.x, y: e.y },
+    p1: { x: (e.x + e.baseSlot.x) / 2, y: Math.min(e.y, e.baseSlot.y) - 36 },
+    p2: { x: e.baseSlot.x, y: e.baseSlot.y - 26 }, p3: { x: e.baseSlot.x, y: e.baseSlot.y },
+    t: 0, dur: 900 / speedMult(),
+  };
+}
+function updateDiving(e, dt) {
+  if (e.diveKind === 'attack') {
+    e.dive.t += dt;
+    const t = Math.min(1, e.dive.t / e.dive.dur);
+    const pos = bez(e.dive.p0, e.dive.p1, e.dive.p2, e.dive.p3, smooth(t));
+    e.x = pos.x; e.y = pos.y;
+    e.fireTimer -= dt;
+    if (!G.bonusStage && e.fireTimer <= 0 && t < 0.92 && G.enemyBullets.length < enemyBulletCap()) {
+      fireEnemyBullet(e);
+      e.fireTimer = fireInterval() * rnd(0.6, 1.3);
+    }
+    if (t >= 1) startReturn(e);
+  } else { // capture
+    if (e.capPhase === 'descend') {
+      e.dive.t += dt;
+      const t = Math.min(1, e.dive.t / e.dive.dur);
+      const pos = bez(e.dive.p0, e.dive.p1, e.dive.p2, e.dive.p3, smooth(t));
+      e.x = pos.x; e.y = pos.y;
+      if (t >= 1) { e.capPhase = 'beam'; e.beamT = 0; }
+    } else if (e.capPhase === 'beam') {
+      e.beamT += dt;
+      if (e.beamT >= BEAM_MS) { resolveCapture(e); startReturn(e); }
+    }
+  }
+}
+function updateReturning(e, dt) {
+  e.ret.t += dt;
+  const t = Math.min(1, e.ret.t / e.ret.dur);
+  const pos = bez(e.ret.p0, e.ret.p1, e.ret.p2, e.ret.p3, smooth(t));
+  e.x = pos.x; e.y = pos.y;
+  if (t >= 1) { e.state = 'formation'; e.x = e.baseSlot.x; e.y = e.baseSlot.y; }
+}
+
+// ================= 포획 광선 =================
+function resolveCapture(e) {
+  const p = G.player;
+  if (p.state === 'alive' && !p.dual && p.invuln <= 0 && Math.abs(p.x - e.x) < CAPTURE_RADIUS) {
+    e.carrying = true;
+    Sound.sfx('capture');
+    doCapturePlayer();
+  }
+}
+function doCapturePlayer() {
+  spawnParticles(G.player.x, G.player.y, '#3ad6c8');
+  Sound.sfx('pexplode', 0.1);
+  G.lives--;
+  if (G.lives < 0) { gameOver(); return; }
+  G.player.state = 'respawning'; G.player.respawnT = RESPAWN_MS;
+}
+function startRescue(x, y) {
+  G.rescue = { x0: x, y0: y, t: 0, dur: 600 };
+}
+
+// ================= 총알 =================
+function firePlayer() {
+  if (G.player.state !== 'alive' || G.playerBullets.length >= PLAYER_MAX_BULLETS) return;
+  if (G.player.fireCd > 0) return;
+  G.playerBullets.push({ x: G.player.x, y: G.player.y - 9 });
+  if (G.player.dual) G.playerBullets.length > PLAYER_MAX_BULLETS && G.playerBullets.pop();
+  G.player.fireCd = FIRE_COOLDOWN;
+  Sound.sfx('shoot');
+}
+function fireEnemyBullet(e) {
+  G.enemyBullets.push({ x: e.x, y: e.y + spriteH(e.type) / 2, vy: (140 + (G.stage - 1) * 6) * dm().bulletMult });
+}
+
+// ================= 점수 · 목숨 =================
+function addScore(n) {
+  G.score += n;
+  while (G.score >= G.next1up) { G.lives = Math.min(9, G.lives + 1); G.next1up += NEXT_1UP; popup('1UP', '#ffd84a'); Sound.sfx('oneup'); }
+  if (!G.recordShown && G.best > 0 && G.score > G.best) { G.recordShown = true; popup('NEW RECORD!', '#ff7ad9'); }
+}
+function popup(text, color = '#ffd84a') { G.popups.push({ text, color, t: 0, x: G.player.x, y: G.player.y - 20 }); }
+function spawnParticles(x, y, color) { G.particles.push({ x, y, t: 0, color }); }
+
+function scoreForKill(e) { const s = SCORE[e.type]; return e.state === 'diving' ? s.dive : s.form; }
+function hitEnemy(e) {
+  if (e.type === 'Q') {
+    e.hp--;
+    if (e.hp <= 0) { addScore(scoreForKill(e)); killEnemy(e); }
+    else { e.cracked = true; Sound.sfx('crack'); }
+  } else {
+    addScore(scoreForKill(e));
+    killEnemy(e);
+  }
+}
+function killEnemy(e) {
+  removeFromArray(G.enemies, e);
+  spawnParticles(e.x, e.y, colorForType(e.type));
+  Sound.sfx('explode');
+  if (e.carrying) startRescue(e.x, e.y + 14);
+}
+function colorForType(t) { return PAL[t] ? PAL[t][1] : '#fff'; }
+
+// ================= 플레이어 피격 =================
+function hitPlayer() {
+  const p = G.player;
+  if (p.state !== 'alive' || p.invuln > 0) return;
+  if (p.dual) {
+    p.dual = false; p.invuln = DUAL_INVULN_MS;
+    Sound.sfx('hit'); popup('기체 손실', '#ff7ad9');
+    return;
+  }
+  spawnParticles(p.x, p.y, '#3ad6c8');
+  Sound.sfx('pexplode');
+  G.lives--;
+  if (G.lives < 0) { gameOver(); return; }
+  p.state = 'respawning'; p.respawnT = RESPAWN_MS;
+}
+
+// ================= 프레임 갱신 =================
+function updatePlayer(dt) {
+  const p = G.player;
+  if (p.invuln > 0) p.invuln = Math.max(0, p.invuln - dt);
+  if (p.fireCd > 0) p.fireCd = Math.max(0, p.fireCd - dt);
+  if (p.state === 'respawning') {
+    p.respawnT -= dt;
+    if (p.respawnT <= 0) { p.state = 'alive'; p.x = CX; p.invuln = INVULN_MS; }
+    return;
+  }
+  const half = (p.dual ? spriteW('ship') + 14 : spriteW('ship')) / 2 + 8;
+  if (Input.dir) p.x = clamp(p.x + Input.dir * PLAYER_SPEED * dt / 1000, half, VW - half);
+  if (Input.fire) firePlayer();
+}
+function updateBullets(dt) {
+  for (const b of G.playerBullets) b.y -= 260 * dt / 1000;
+  G.playerBullets = G.playerBullets.filter(b => b.y > -10);
+  for (const b of G.enemyBullets) b.y += b.vy * dt / 1000;
+  G.enemyBullets = G.enemyBullets.filter(b => b.y < VH + 10);
+}
+function updateEnemies(dt) {
+  for (const e of G.enemies) {
+    if (e.state === 'wait') { e.delay -= dt; if (e.delay <= 0) startEntry(e, !!e.bonus); }
+    else if (e.state === 'enter') updateEntry(e, dt);
+    else if (e.state === 'diving') updateDiving(e, dt);
+    else if (e.state === 'returning') updateReturning(e, dt);
+  }
+  updateFormation(dt);
+  if (!G.bonusStage) {
+    G.captureCooldown = Math.max(0, G.captureCooldown - dt);
+    G.diveTimer -= dt;
+    if (G.diveTimer <= 0) { tryStartDive(); G.diveTimer = diveInterval() * rnd(0.75, 1.25); }
+  }
+  if (G.rescue) {
+    G.rescue.t += dt;
+    const t = Math.min(1, G.rescue.t / G.rescue.dur);
+    // 도착 애니메이션이 끝나도 플레이어가 아직 부활 중이면(다른 대장에게 연속으로 붙잡힌 경우)
+    // 기체가 살아날 때까지 기다렸다가 합류시킨다(그냥 사라뜨리지 않는다).
+    if (t >= 1 && G.player.state === 'alive') {
+      if (!G.player.dual) { G.player.dual = true; popup('쌍발 기체!', '#4ad8ff'); Sound.sfx('rescue'); }
+      G.rescue = null;
+    }
+  }
+}
+function collideBulletEnemy(b) {
+  for (const e of G.enemies) {
+    if (e.carrying) {
+      const cy = e.y + 14;
+      if (rectHit(b.x, b.y, 3, 9, e.x, cy, spriteW('ship') * 0.7, spriteH('ship') * 0.7)) {
+        e.carrying = false; spawnParticles(e.x, cy, '#3ad6c8'); Sound.sfx('hit');
+        return true;
+      }
+    }
+    if (e.state === 'wait') continue;
+    if (rectHit(b.x, b.y, 3, 9, e.x, e.y, spriteW(e.type), spriteH(e.type))) {
+      if (e.bonus) {
+        G.bonusHits++; addScore(BONUS_HIT_SCORE);
+        removeFromArray(G.enemies, e); spawnParticles(e.x, e.y, colorForType(e.type)); Sound.sfx('explode');
+      } else hitEnemy(e);
+      return true;
+    }
+  }
+  return false;
+}
+function collisions() {
+  G.playerBullets = G.playerBullets.filter(b => !collideBulletEnemy(b));
+  if (!G.bonusStage) {
+    const p = G.player;
+    for (const b of G.enemyBullets) {
+      if (p.state === 'alive' && p.invuln <= 0 && rectHit(b.x, b.y, 4, 6, p.x, p.y, spriteW('ship'), spriteH('ship'))) {
+        b.dead = true; hitPlayer();
+      }
+    }
+    G.enemyBullets = G.enemyBullets.filter(b => !b.dead);
+    if (p.state === 'alive' && p.invuln <= 0) {
+      for (const e of G.enemies) {
+        if (e.state === 'wait' || e.state === 'formation') continue;
+        if (rectHit(p.x, p.y, spriteW('ship'), spriteH('ship'), e.x, e.y, spriteW(e.type), spriteH(e.type))) {
+          hitPlayer();
+          if (e.type !== 'Q') { removeFromArray(G.enemies, e); spawnParticles(e.x, e.y, colorForType(e.type)); }
+          break;
+        }
+      }
+    }
+  }
+}
+function checkStageClear() {
+  if (G.state !== 'playing') return;
+  if (G.enemies.length > 0) return;
+  if (G.bonusStage) finishBonusStage(); else finishStage();
+}
+
+// ================= 스테이지 진행 =================
+function startStage(n) {
+  G.state = 'playing'; G.stage = n; G.bonusStage = false;
+  G.enemies = buildFormation();
+  G.playerBullets = []; G.enemyBullets = []; G.particles = []; G.rescue = null;
+  G.diveTimer = diveInterval(); G.captureCooldown = 0;
+  G.stageBannerT = 1600;
+  Sound.bgmStart(0.3);
+}
+function startBonusStage() {
+  G.state = 'playing'; G.bonusStage = true; G.bonusHits = 0;
+  G.enemies = buildBonusWaves(); G.bonusTotal = G.enemies.length;
+  G.playerBullets = []; G.enemyBullets = []; G.particles = []; G.rescue = null;
+  G.stageBannerT = 1600;
+  Sound.bgmStart(0.3);
+}
+function finishStage() {
+  G.state = 'stageclear';
+  const bonus = 200 * G.stage;
+  addScore(bonus);
+  Sound.bgmStop(); Sound.sfx('stage');
+  $('#stageTitle').textContent = `STAGE ${G.stage} CLEAR!`;
+  $('#stageBonus').textContent = `클리어 보너스 +${bonus}`;
+  const next = G.stage + 1;
+  $('#stageNext').textContent = next % 3 === 0
+    ? '다음은 보너스 스테이지! 적이 총을 쏘지 않습니다. 전부 격추해 보세요.'
+    : `다음은 스테이지 ${next} · 급강하가 더 잦아지고 빨라집니다.`;
+  showScreen('scrStage');
+}
+function finishBonusStage() {
+  G.state = 'stageclear';
+  const perfect = G.bonusHits >= G.bonusTotal && G.bonusTotal > 0;
+  if (perfect) { addScore(BONUS_PERFECT); Sound.sfx('perfect'); } else Sound.sfx('stage');
+  Sound.bgmStop();
+  $('#stageTitle').textContent = 'BONUS STAGE';
+  $('#stageBonus').textContent = perfect ? `전부 명중! PERFECT +${BONUS_PERFECT}` : `명중 ${G.bonusHits} / ${G.bonusTotal}`;
+  $('#stageNext').textContent = `다음은 스테이지 ${G.stage + 1}.`;
+  showScreen('scrStage');
+}
+function nextAfterClear() {
+  if (G.bonusStage) startStage(G.stage + 1);
+  else if (G.stage % 3 === 0) startBonusStage();
+  else startStage(G.stage + 1);
+  hideOverlay();
+}
+
+// ================= 실행 관리 =================
+function resetRun() {
+  G.score = 0; G.next1up = FIRST_1UP; G.recordShown = false;
+  G.lives = dm().lives - 1; // 화면에 나와 있는 1기는 별도 표시
+  G.player = { x: CX, y: PLAYER_Y, dual: false, state: 'alive', respawnT: 0, invuln: INVULN_MS, fireCd: 0 };
+  G.enemies = []; G.playerBullets = []; G.enemyBullets = []; G.particles = []; G.popups = []; G.rescue = null;
+  G.time = 0; G.danger = false; Sound.danger = false;
+  const top = store.get('ra-02-scores-' + G.difficulty, []);
+  G.best = top.length ? top[0].s : 0;
+}
+function startGame() {
+  Sound.init(); applySound(); resetRun(); hideOverlay(); resetInput();
+  Sound.sfx('start');
+  G.state = 'playing';
+  startStage(1);
+}
+function gameOver() {
+  G.state = 'over'; G.overShown = false;
+  resetInput(); Sound.bgmStop(); Sound.sfx('over');
+  G.rank = saveScore();
+}
+function saveScore() {
+  const key = 'ra-02-scores-' + G.difficulty;
+  const entry = { s: G.score, st: G.stage, d: Date.now() };
+  const top = [...store.get(key, []), entry].sort((a, b) => b.s - a.s).slice(0, 5);
+  store.set(key, top);
+  return top.indexOf(entry);
+}
+function showGameOver() {
+  G.overShown = true;
+  const msg = G.rank === 0 && G.score > 0 ? '★ 최고 기록 달성! ★' : G.rank > 0 ? `역대 ${G.rank + 1}위 기록!` : '한 판 더?';
+  $('#overMsg').textContent = msg;
+  $('#overStat').innerHTML = `<dt>점수</dt><dd>${G.score}</dd><dt>스테이지</dt><dd>${G.stage}</dd>`;
+  const top = store.get('ra-02-scores-' + G.difficulty, []);
+  $('#overRank').innerHTML = top.map((e, i) =>
+    `<li class="${i === G.rank ? 'me' : ''}"><span>${i + 1}. ${pad6(e.s)}</span><span>ST ${e.st}</span></li>`
+  ).join('');
+  showScreen('scrOver');
+}
+function pause() {
+  if (G.state !== 'playing') return;
+  G.prev = G.state; G.state = 'paused';
+  resetInput(); Sound.bgmStop(); Sound.sfx('pause'); refreshToggles(); showScreen('scrPause');
+}
+function resume() {
+  if (G.state !== 'paused') return;
+  G.state = G.prev; hideOverlay(); Sound.init(); Sound.bgmStart();
+}
+const togglePause = () => (G.state === 'paused' ? resume() : pause());
+function goTitle() {
+  Sound.bgmStop(); G.state = 'title'; resetRun(); refreshTitle(); showScreen('scrTitle');
+}
+
+// ================= 입력 =================
+const Input = { dir: 0, fire: false, left: false, right: false };
+function resetInput() { Object.assign(Input, { dir: 0, fire: false, left: false, right: false }); document.querySelectorAll('.pb.on').forEach(b => b.classList.remove('on')); }
+function recalcDir() { Input.dir = (Input.left ? -1 : 0) + (Input.right ? 1 : 0); }
+function press(act) {
+  if (act === 'pause') { togglePause(); return; }
+  if (act === 'left') { Input.left = true; recalcDir(); return; }
+  if (act === 'right') { Input.right = true; recalcDir(); return; }
+  if (act === 'fire') { Input.fire = true; return; }
+}
+function release(act) {
+  if (act === 'left') { Input.left = false; recalcDir(); }
+  else if (act === 'right') { Input.right = false; recalcDir(); }
+  else if (act === 'fire') Input.fire = false;
+}
+function menuInput(act) {
+  switch (G.state) {
+    case 'title':
+      if (act === 'left' || act === 'right') setDiff(cycleDiff(act === 'right' ? 1 : -1));
+      else if (act === 'ok') startGame();
+      break;
+    case 'paused': if (act === 'ok') resume(); break;
+    case 'stageclear': if (act === 'ok') nextAfterClear(); break;
+    case 'over': if (!G.overShown) break; if (act === 'ok') startGame(); else if (act === 'back') goTitle(); break;
+  }
+}
+const DIFF_ORDER = ['easy', 'normal', 'hard'];
+function cycleDiff(d) { const i = DIFF_ORDER.indexOf(G.difficulty); return DIFF_ORDER[(i + d + 3) % 3]; }
+
+const KEYMAP = { ArrowLeft: 'left', ArrowRight: 'right', KeyA: 'left', KeyD: 'right', Space: 'fire', KeyZ: 'fire' };
+const MENUKEY = { ArrowLeft: 'left', ArrowRight: 'right', Enter: 'ok', NumpadEnter: 'ok', Space: 'ok' };
+
+window.addEventListener('keydown', e => {
+  const code = e.code;
+  const ovOpen = !ov.classList.contains('hidden');
+  const btnFocused = ovOpen && document.activeElement && document.activeElement.tagName === 'BUTTON';
+  if ((code === 'Enter' || code === 'Space') && btnFocused) return;
+  if (code === 'KeyM') { if (!e.repeat) toggleMute(); return; }
+  if (code === 'KeyP' || code === 'Escape') {
+    e.preventDefault();
+    if (e.repeat) return;
+    if (code === 'Escape' && G.state === 'over') menuInput('back'); else togglePause();
+    return;
+  }
+  if (G.state !== 'playing') {
+    const m = MENUKEY[code];
+    if (m) { e.preventDefault(); if (!e.repeat) menuInput(m); }
+    return;
+  }
+  const act = KEYMAP[code];
+  if (!act) return;
+  e.preventDefault();
+  press(act);
+});
+window.addEventListener('keyup', e => { const act = KEYMAP[e.code]; if (act) release(act); });
+window.addEventListener('blur', () => { resetInput(); pause(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { resetInput(); pause(); } });
+
+const PAD_MENU = { left: 'left', right: 'right', fire: 'ok' };
+document.querySelectorAll('#pad [data-act]').forEach(b => {
+  const act = b.dataset.act;
+  b.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    b.classList.add('on');
+    try { b.setPointerCapture(e.pointerId); } catch (err) { /* 일부 브라우저 미지원 */ }
+    Sound.init();
+    if (G.state === 'playing' || act === 'pause') press(act);
+    else if (PAD_MENU[act]) menuInput(PAD_MENU[act]);
+  });
+  const up = () => { b.classList.remove('on'); release(act); };
+  b.addEventListener('pointerup', up);
+  b.addEventListener('pointercancel', up);
+  b.addEventListener('lostpointercapture', up);
+  b.addEventListener('contextmenu', e => e.preventDefault());
+});
+
+// ================= 화면(DOM) =================
+const $ = s => document.querySelector(s);
+const ov = $('#ov');
+const SCREENS = ['scrTitle', 'scrPause', 'scrStage', 'scrOver'];
+function showScreen(id) { ov.classList.remove('hidden'); SCREENS.forEach(s => $('#' + s).classList.toggle('hidden', s !== id)); }
+function hideOverlay() { ov.classList.add('hidden'); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
+
+const TG_LABEL = { bgm: '음악', sfx: '효과음' };
+function setDiff(d) { G.difficulty = d; settings.diff = d; saveSettings(); resetRun(); refreshTitle(); Sound.sfx('select'); }
+function refreshTitle() {
+  document.querySelectorAll('[data-diff]').forEach(b => b.classList.toggle('sel', b.dataset.diff === G.difficulty));
+  $('#diffDesc').textContent = DIFF[G.difficulty].label;
+  $('#bestLine').textContent = G.best ? `최고 점수 ${pad6(G.best)}` : '아직 기록이 없어요';
+  refreshToggles();
+}
+function refreshTitleKeys() {
+  $('#titleKeys').innerHTML = document.body.classList.contains('touch')
+    ? '◀ ▶ 이동 · FIRE 발사'
+    : '← → 이동 · Space 발사 · P 일시정지';
+}
+function refreshToggles() {
+  document.querySelectorAll('[data-tg]').forEach(b => {
+    const k = b.dataset.tg;
+    b.classList.toggle('sel', settings[k]);
+    b.textContent = `${TG_LABEL[k]} ${settings[k] ? 'ON' : 'OFF'}`;
+  });
+  $('#btnMute').setAttribute('aria-pressed', String(settings.muted));
+}
+function applySound() {
+  Sound.bgmOn = settings.bgm; Sound.sfxOn = settings.sfx; Sound.setMuted(settings.muted);
+  if (!settings.bgm) Sound.bgmStop();
+}
+function toggleMute() {
+  settings.muted = !settings.muted; saveSettings();
+  Sound.init(); applySound(); refreshToggles();
+  if (!settings.muted && G.state === 'playing') Sound.bgmStart();
+}
+document.querySelectorAll('[data-diff]').forEach(b => b.addEventListener('click', () => setDiff(b.dataset.diff)));
+document.querySelectorAll('[data-tg]').forEach(b => b.addEventListener('click', () => {
+  const k = b.dataset.tg; settings[k] = !settings[k]; saveSettings(); applySound(); refreshToggles();
+}));
+$('#btnStart').addEventListener('click', startGame);
+$('#btnResume').addEventListener('click', resume);
+$('#btnQuit').addEventListener('click', goTitle);
+$('#btnNext').addEventListener('click', nextAfterClear);
+$('#btnRetry').addEventListener('click', startGame);
+$('#btnTitle').addEventListener('click', goTitle);
+$('#btnPause').addEventListener('click', e => { e.currentTarget.blur(); togglePause(); });
+$('#btnMute').addEventListener('click', e => { e.currentTarget.blur(); toggleMute(); });
+
+// ================= 배경 별 =================
+const STARS = Array.from({ length: 70 }, () => ({ x: rnd(0, VW), y: rnd(0, VH), z: rnd(0.3, 1) }));
+function updateStars(dt) {
+  for (const s of STARS) { s.y += s.z * 55 * dt / 1000; if (s.y > VH) { s.y = -2; s.x = rnd(0, VW); } }
+}
+
+// ================= 그리기 =================
+const cv = $('#cv'), ctx = cv.getContext('2d');
+let SC = 2, DPR = 1;
+const R = Math.round;
+const pad6 = n => String(n).padStart(6, '0');
+
+function layout() {
+  const touch = document.body.classList.contains('touch');
+  const app = $('#app'), hdr = $('#hdr');
+  const cs = getComputedStyle(app);
+  const below = touch ? $('#pad').offsetHeight : $('#help').offsetHeight;
+  const used = hdr.offsetHeight + below + 16 + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+  const availW = window.innerWidth - 16, availH = window.innerHeight - used;
+  SC = Math.max(1, Math.min(2.6, Math.min(availW / VW, availH / VH)));
+  DPR = Math.min(3, window.devicePixelRatio || 1);
+  cv.width = R(VW * SC * DPR); cv.height = R(VH * SC * DPR);
+  cv.style.width = R(VW * SC) + 'px'; cv.style.height = R(VH * SC) + 'px';
+  hdr.style.width = R(VW * SC) + 'px';
+}
+
+function drawSprite(sprite, palette, cx, cy, overrideColor) {
+  const w = sprite[0].length, h = sprite.length;
+  const ox = cx - (w * PX) / 2, oy = cy - (h * PX) / 2;
+  for (let ry = 0; ry < h; ry++) {
+    const row = sprite[ry];
+    for (let rx = 0; rx < w; rx++) {
+      const ch = row[rx];
+      if (ch === '.') continue;
+      ctx.fillStyle = overrideColor || palette[ch];
+      ctx.fillRect(R(ox + rx * PX), R(oy + ry * PX), PX, PX);
+    }
+  }
+}
+function drawShip(x, y, dual, dim, blink) {
+  if (blink) return;
+  const pal = dim ? PAL.shipDim : PAL.ship;
+  if (dual) { drawSprite(SPR.ship, pal, x - 12, y); drawSprite(SPR.ship, pal, x + 12, y); }
+  else drawSprite(SPR.ship, pal, x, y);
+}
+function drawEnemy(e) {
+  if (e.state === 'wait') return;
+  const pal = e.type === 'Q' ? (e.cracked ? PAL.Qcrack : PAL.Q) : PAL[e.type];
+  if (e.type === 'J') ctx.globalAlpha = 0.78; // 해파리 몸통은 반투명하게
+  drawSprite(SPR[e.type], pal, e.x, e.y);
+  ctx.globalAlpha = 1;
+  if (e.carrying) drawSprite(SPR.ship, PAL.shipDim, e.x, e.y + 14);
+  if (e.diveKind === 'capture' && e.capPhase === 'beam') {
+    const w = lerp(4, 30, Math.min(1, e.beamT / BEAM_MS));
+    const grad = ctx.createLinearGradient(0, e.y, 0, G.player.y);
+    grad.addColorStop(0, 'rgba(255,120,220,.55)'); grad.addColorStop(1, 'rgba(255,120,220,.05)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(R(e.x - w / 2), R(e.y), R(w), R(G.player.y - e.y));
+  }
+}
+function drawParticles(dt) {
+  for (const p of G.particles) p.t += dt;
+  G.particles = G.particles.filter(p => p.t < 380);
+  for (const p of G.particles) {
+    const a = 1 - p.t / 380, rad = p.t * 0.05;
+    ctx.globalAlpha = Math.max(0, a); ctx.fillStyle = p.color;
+    for (let i = 0; i < 6; i++) {
+      const ang = i * Math.PI / 3;
+      ctx.fillRect(R(p.x + Math.cos(ang) * rad - 1), R(p.y + Math.sin(ang) * rad - 1), 2, 2);
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+function txt(s, x, y, px, color, align = 'left') {
+  ctx.font = `${px}px Galmuri11, monospace`;
+  ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'top';
+  ctx.fillText(s, x, y);
+}
+function drawHUD() {
+  ctx.fillStyle = '#05060d'; ctx.fillRect(0, 0, VW, TOPH); ctx.fillRect(0, PLAY_Y1, VW, BOTH);
+  txt('SCORE', 4, 3, 6, '#8d93c4'); txt(pad6(G.score), 4, 10, 8, '#ffd84a');
+  txt('HI', VW - 4, 3, 6, '#8d93c4', 'right'); txt(pad6(Math.max(G.best, G.score)), VW - 4, 10, 8, '#eef0ff', 'right');
+  const label = G.bonusStage ? 'BONUS' : `STAGE ${G.stage}`;
+  txt(label, VW - 4, PLAY_Y1 + 6, 7, '#8d93c4', 'right');
+  const shown = Math.min(MAX_LIVES_SHOWN, G.lives);
+  for (let i = 0; i < shown; i++) drawSprite(SPR.ship, PAL.ship, 8 + i * 11, PLAY_Y1 + 10);
+  if (G.lives > MAX_LIVES_SHOWN) txt('+' + (G.lives - MAX_LIVES_SHOWN), 8 + MAX_LIVES_SHOWN * 11, PLAY_Y1 + 6, 7, '#eef0ff');
+}
+function drawBanner() {
+  if (G.stageBannerT <= 0) return;
+  const a = G.stageBannerT > 300 ? 1 : G.stageBannerT / 300;
+  ctx.globalAlpha = a;
+  const label = G.bonusStage ? 'BONUS STAGE' : `STAGE ${G.stage}`;
+  ctx.lineWidth = 3; ctx.strokeStyle = '#000';
+  ctx.font = '18px Galmuri11, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.strokeText(label, CX, VH * 0.4);
+  ctx.fillStyle = '#ffd84a'; ctx.fillText(label, CX, VH * 0.4);
+  ctx.globalAlpha = 1;
+}
+function draw() {
+  ctx.setTransform(SC * DPR, 0, 0, SC * DPR, 0, 0);
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = '#05060f'; ctx.fillRect(0, 0, VW, VH);
+  ctx.fillStyle = '#fff';
+  for (const s of STARS) { ctx.globalAlpha = 0.3 + s.z * 0.6; ctx.fillRect(R(s.x), R(s.y), 1, 1); }
+  ctx.globalAlpha = 1;
+
+  if (G.state === 'playing' || G.state === 'paused' || G.state === 'stageclear') {
+    for (const e of G.enemies) drawEnemy(e);
+    if (G.rescue) {
+      const t = Math.min(1, G.rescue.t / G.rescue.dur);
+      drawSprite(SPR.ship, PAL.shipDim, lerp(G.rescue.x0, G.player.x, t), lerp(G.rescue.y0, G.player.y, t));
+    }
+    const p = G.player;
+    const blink = p.invuln > 0 && Math.floor(performance.now() / 100) % 2 === 0;
+    if (p.state === 'alive') drawShip(p.x, p.y, p.dual, false, blink);
+    ctx.fillStyle = '#fff7b0';
+    for (const b of G.playerBullets) ctx.fillRect(R(b.x - 1.5), R(b.y - 4), 3, 9);
+    ctx.fillStyle = '#ff5a5a';
+    for (const b of G.enemyBullets) ctx.fillRect(R(b.x - 2), R(b.y - 3), 4, 6);
+    drawParticles(0);
+    drawHUD();
+    if (G.state === 'playing') drawBanner(); // 일시정지 화면 위로 배너 글자가 겹쳐 보이지 않도록
+  } else {
+    drawHUD();
+  }
+}
+
+// ================= 루프(고정 시간 간격) =================
+const STEP = 1000 / 60;
+let acc = 0, last = performance.now();
+function update(dt) {
+  updateStars(dt);
+  for (const p of G.popups) p.t += dt;
+  G.popups = G.popups.filter(p => p.t < 1100);
+  if (G.state !== 'playing') return;
+  G.time += dt;
+  updatePlayer(dt);
+  updateEnemies(dt);
+  updateBullets(dt);
+  collisions();
+  for (const pt of G.particles) pt.t += dt; // draw()에서도 갱신되지만 일시정지 대비 이중 안전
+  if (G.stageBannerT > 0) G.stageBannerT -= dt;
+  G.danger = G.enemies.filter(e => e.state === 'diving').length >= 2 || G.lives === 0;
+  Sound.danger = G.danger;
+  checkStageClear();
+}
+function frame(now) {
+  let dt = now - last; last = now;
+  if (dt > 250) dt = 250;
+  acc += dt;
+  while (acc >= STEP) { update(STEP); acc -= STEP; }
+  draw();
+  requestAnimationFrame(frame);
+}
+
+// ================= 시작 =================
+if (window.matchMedia && matchMedia('(pointer: coarse)').matches) document.body.classList.add('touch');
+window.addEventListener('touchstart', () => {
+  if (document.body.classList.contains('touch')) return;
+  document.body.classList.add('touch'); refreshTitleKeys(); layout();
+}, { passive: true });
+window.addEventListener('resize', layout);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+
+applySound();
+resetRun();
+refreshTitleKeys();
+refreshTitle();
+layout();
+showScreen('scrTitle');
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
