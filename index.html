@@ -167,6 +167,27 @@ textarea{width:100%;box-sizing:border-box;min-height:110px;border:2px solid var(
 .door small{display:block;font-size:16px;color:var(--muted)}
 .door .go{font-family:var(--display);font-size:22px;color:var(--coral-deep)}
 .lastgame{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;padding:6px 4px;font-size:16px}
+.labcard{display:flex;align-items:center;gap:14px;width:100%;box-sizing:border-box;padding:16px 18px;border-radius:22px;border:2px solid var(--line);background:var(--surface);color:var(--ink);text-align:left;cursor:pointer;font:inherit}
+.labcard.main{border-color:var(--sky);box-shadow:0 5px 0 var(--line)}
+.labcard .tag{flex:none;font-family:var(--display);font-size:15px;padding:4px 10px;border-radius:999px;background:var(--sky);color:var(--sky-ink)}
+.labcard .tx{flex:1;min-width:0}
+.labcard b{display:block;font-family:var(--display);font-weight:400;font-size:22px;line-height:1.25}
+.labcard small{display:block;font-size:15px;color:var(--muted)}
+.labcard .go{font-family:var(--display);font-size:22px;color:var(--coral-deep)}
+.labcard .ok{font-family:var(--display);color:var(--leaf)}
+.stamps{display:flex;flex-wrap:wrap;gap:10px}
+.stamps i{width:46px;height:46px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;font-style:normal;font-size:24px}
+.stamps i.on{border:2px solid var(--coral);background:var(--sun-soft)}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:5.5em 1fr 3em;align-items:center;gap:8px;font-size:16px}
+.bar span{height:14px;border-radius:7px;background:var(--sky)}
+.bar.top span{background:var(--coral)}
+.stem{font-family:var(--display);font-size:22px;line-height:1.5}
+.stem u{text-decoration:none;border-bottom:3px dashed var(--coral);padding:0 1.5em}
+.gold .b-light{fill:var(--coral);animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.gold .b-light{animation:none}}
+.door.lab .ic{background:var(--bg);font-size:36px}
 .lastgame b{font-family:var(--display);font-weight:400;color:var(--coral-deep)}
 
 /* 메뉴: 폰은 화면 아래 고정, 넓은 화면은 머리줄 아래 */
@@ -547,20 +568,23 @@ function home(){
 
   if (S.view === 'arcade') return arcade;
   if (S.view === 'board') return boardHTML();
+  if (S.view === 'lab') return labHTML();
   if (S.view === 'class') return stage(next === -1 ? 'cheer' : 'happy', say) + `<div class="map">${stops}</div>` + cert + aiLinks();
   return entry(next) + `
     <details class="parents"><summary>부모님께</summary><ul>
       <li>수업 하나는 3~5분이면 끝나요. 하루에 1~2개씩 함께 보시길 권해요.</li>
       <li>3·8·10번 수업에서 만든 질문은 복사해서 아이와 같이 실제 AI에 넣어 보세요.</li>
       <li>진행 기록(별)은 이 기기의 브라우저에만 저장돼요.</li>
+      <li>실험실에는 매주 월요일 새 도전, 매달 새 실험이 열려요. 실험 속 AI 답과 숫자는 이해를 돕기 위해 미리 만든 예시이고, 진짜 AI에 연결되지 않아요.</li>
       <li>수업을 하지 않아도 오락실 게임은 언제든 할 수 있어요. 게임에서 돌아올 땐 뒤로 가기를 눌러 주세요.</li>
       <li>배경음악과 효과음은 맨 위 버튼으로 따로 끌 수 있고, 고른 설정은 기억돼요.</li>
     </ul></details>`;
 }
 
 /* ---------- 수업 ---------- */
+function cur(){ return S.lab ? LAB.find(x => x.id === S.lab) : LESSONS[S.li]; }
 function lesson(){
-  const L = LESSONS[S.li];
+  const L = cur();
   const steps = L.talk.length + 2;
   const at = S.phase === 'talk' ? S.ti : S.phase === 'act' ? L.talk.length : steps - 1;
   const dots = Array.from({length:steps}, (_, k) => `<i class="${k <= at ? 'on' : ''}"></i>`).join('');
@@ -580,12 +604,16 @@ function lesson(){
       <div class="memo"><h3>꼭 기억해요</h3><ul>${L.remember.map(r => `<li>${r}</li>`).join('')}</ul></div>
       <div class="row end"><button class="btn ghost" data-a="home">지도로</button>
       ${S.li < LESSONS.length - 1 ? '<button class="btn" data-a="nextlesson">다음 수업</button>' : '<button class="btn" data-a="home">인증서 보러 가기</button>'}</div></div>`;
+    if (S.lab) body = stage('cheer', '실험 성공! 도장 하나 쾅! 이번에 <b>알게 된 것</b>이야.') + `<div class="panel">
+      <div class="memo"><h3>알게 된 것</h3><ul>${L.remember.map(r => `<li>${r}</li>`).join('')}</ul></div>
+      <div class="row end"><button class="btn" data-a="tab" data-v="lab">실험실로</button></div></div>`;
   }
-  return `<div class="lhead"><button class="back" data-a="home">← 지도로</button><div class="dots">${dots}</div></div>
-    <h1 class="ltitle"><em>${S.li+1}</em>${L.title}</h1>` + body;
+  const back = S.lab ? '<button class="back" data-a="tab" data-v="lab">← 실험실로</button>' : '<button class="back" data-a="home">← 지도로</button>';
+  return `<div class="lhead">${back}<div class="dots">${dots}</div></div>
+    <h1 class="ltitle"><em>${S.lab ? (L.kind === 'month' ? '실험' : '도전') : S.li+1}</em>${L.title}</h1>` + body;
 }
 
-const nextBtn = (more) => `<div class="row end"><button class="btn" data-a="${more ? 'round' : 'finish'}">${more ? '다음 문제' : '별 받기'}</button></div>`;
+const nextBtn = (more) => `<div class="row end"><button class="btn" data-a="${more ? 'round' : 'finish'}">${more ? '다음 문제' : S.lab ? '도장 받기' : '별 받기'}</button></div>`;
 
 const ACT = {
   ox(a){
@@ -599,7 +627,7 @@ const ACT = {
   choose(a){
     const it = a.items[S.r], an = S.ans;
     const opts = it.options.map((o, k) => {
-      const c = an && an.ok && o.ok ? 'right' : (S.tried.includes(k) ? 'wrong' : '');
+      const c = an && an.ok && an.k === k ? 'right' : (S.tried.includes(k) ? 'wrong' : '');
       return `<button class="opt ${c}" data-a="choose" data-k="${k}">${o.t}</button>`;
     }).join('');
     return `<p class="q">${S.r+1}/${a.items.length}. ${it.q}</p><div class="opts">${opts}</div>
@@ -624,11 +652,18 @@ const ACT = {
     return groups + `<div class="prompt" id="prompt-text">${preview}</div>
       ${full ? `<div class="row end"><button class="btn sky" data-a="copy">질문 복사하기</button><button class="btn" data-a="finish">별 받기</button></div>` : ''}`;
   },
-  write(){
-    return `<label class="q" for="my-q">진짜 궁금한 걸 질문으로 써 봐!</label>
-      <textarea id="my-q" placeholder="예) 초등학생이 이해할 수 있게 지구가 왜 도는지 3줄로 알려줘">${S.text || ''}</textarea>
+  next(a){
+    const it = a.items[S.r], an = S.ans;
+    const pick = it.words.map(([w], k) => [w, k]).sort((x, y) => x[0].localeCompare(y[0], 'ko')).map(([w, k]) => `<button class="opt ${an && an.k === k ? (an.ok ? 'right' : 'wrong') : ''}" data-a="next1" data-k="${k}">${w}</button>`).join('');
+    const bars = it.words.map(([w, p], k) => `<div class="bar ${k === 0 ? 'top' : ''}"><b>${w}</b><span style="width:${p}%"></span><small>${p}%</small></div>`).join('');
+    return `<p class="q">${S.r+1}/${a.items.length}. 빈칸에 올 낱말은?</p><p class="stem">${it.stem} <u></u></p>
+      ${an ? `<div class="bars">${bars}</div><p class="small">AI가 이 낱말들을 고를 확률이야. (이해를 돕는 예시 숫자)</p>` + nextBtn(S.r < a.items.length - 1) : `<div class="opts">${pick}</div>`}`;
+  },
+  write(a){
+    return `<label class="q" for="my-q">${a.q || '진짜 궁금한 걸 질문으로 써 봐!'}</label>
+      <textarea id="my-q" placeholder="${a.ph || '예) 초등학생이 이해할 수 있게 지구가 왜 도는지 3줄로 알려줘'}">${S.text || ''}</textarea>
       <ul class="checks" id="checks"></ul>
-      <div class="row end"><button class="btn sky" data-a="copy">질문 복사하기</button><button class="btn" id="finish-w" data-a="finish" disabled>별 받기</button></div>`;
+      <div class="row end"><button class="btn sky" data-a="copy">질문 복사하기</button><button class="btn" id="finish-w" data-a="finish" disabled>${S.lab ? '도장 받기' : '별 받기'}</button></div>`;
   },
 };
 
@@ -661,15 +696,16 @@ function updateWrite(){
 function render(){
   app.innerHTML = header() + nav() + (S.view === 'lesson' ? lesson() : home());
   if (S.view === 'board' && B.rows === null && !B.loading){ B.loading = true; loadBoard().finally(() => { B.loading = false; }); }
-  if (S.view === 'lesson' && S.phase === 'act' && LESSONS[S.li].act.type === 'write') updateWrite();
+  if (S.view === 'lesson' && S.phase === 'act' && cur().act.type === 'write') updateWrite();
+  app.classList.toggle('gold', stamps.length >= 4);
 }
 function openLesson(i){
   S = { view:'lesson', li:i, phase:'talk', ti:0 };
   render(); window.scrollTo(0,0);
 }
 function startAct(){
-  const t = LESSONS[S.li].act.type;
-  const intro = { ox:'맞으면 <b>O</b>, 틀리면 <b>X</b>를 눌러 봐!', choose:'어떤 게 더 좋을까? 하나 골라 봐!',
+  const t = cur().act.type;
+  const intro = { ox:'맞으면 <b>O</b>, 틀리면 <b>X</b>를 눌러 봐!', choose:'어떤 게 더 좋을까? 하나 골라 봐!', next:'AI라면 빈칸에 어떤 낱말을 넣을까? 골라 봐!',
     sort:'하나씩 골라 봐! 헷갈리면 "나를 알아볼 수 있나?"를 생각해.', build:'재료를 하나씩 골라서 질문을 완성해 봐!', write:'' };
   Object.assign(S, { phase:'act', r:0, ans:null, tried:[], sorted:{}, chosen:{}, text:'', mood:'happy', say:intro[t] });
 }
@@ -679,14 +715,26 @@ app.addEventListener('click', e => {
   if (ga) { try { localStorage.setItem(LAST_KEY, ga.dataset.g); } catch(err){} return; }
   const b = e.target.closest('[data-a]');
   if (!b || b.disabled) return;
-  const d = b.dataset, L = LESSONS[S.li];
-  if (['home','open','nextlesson','next','prev','start','round','copy','share','sfx'].includes(d.a)) SND.play('tap');
+  const d = b.dataset, L = cur();
+  if (['home','open','lab','nextlesson','next','prev','start','round','copy','share','sfx'].includes(d.a)) SND.play('tap');
   switch (d.a){
     case 'music': SND.toggleMusic(); break;
     case 'sfx': SND.toggleSfx(); break;
     case 'home': return go('class');
     case 'tab': return go(d.v);
     case 'open': return openLesson(+d.i);
+    case 'lab': S = { view:'lesson', lab:d.id, phase:'talk', ti:0 }; break;
+    case 'next1': {
+      const it = L.act.items[S.r], top = it.words[0][0], [w, p] = it.words[+d.k];
+      if (S.ans) break;
+      const c = top.charCodeAt(top.length - 1) - 0xAC00, top2 = `<b>"${top}"</b>${c >= 0 && c % 28 ? '을' : '를'}`;
+      S.ans = { k:+d.k, ok: w === top }; S.mood = S.ans.ok ? 'cheer' : p >= 10 ? 'happy' : 'wow';
+      SND.play(S.ans.ok ? 'right' : p >= 10 ? 'pick' : 'wrong');
+      S.say = S.ans.ok ? `딩동댕! AI도 ${top2} 가장 많이 골라.`
+        : p >= 10 ? `"${w}"도 그럴듯해! AI도 가끔 골라. 그래도 가장 많이 고르는 건 ${top2}.`
+        : `"${w}"? 하하, 그건 좀 엉뚱하지? AI는 ${top2} 가장 많이 골라.`;
+      break;
+    }
     case 'nextlesson': return openLesson(S.li + 1);
     case 'next': S.ti++; break;
     case 'prev': S.ti--; break;
@@ -702,7 +750,7 @@ app.addEventListener('click', e => {
       const o = L.act.items[S.r].options[+d.k];
       if (S.ans && S.ans.ok) break;
       if (!o.ok && !S.tried.includes(+d.k)) S.tried.push(+d.k);
-      S.ans = { ok:o.ok }; S.mood = o.ok ? 'cheer' : 'think';
+      S.ans = { ok:o.ok, k:+d.k }; S.mood = o.ok ? 'cheer' : 'think';
       SND.play(o.ok ? 'right' : 'wrong'); S.say = o.why + (o.ok ? '' : ' 다른 걸 골라 볼까?');
       break;
     }
@@ -735,13 +783,14 @@ app.addEventListener('click', e => {
       break;
     case 'finish':
       SND.play('star');
-      if (!done.includes(S.li)) { done.push(S.li); save(); }
+      if (S.lab) { if (!stamps.includes(S.lab)) { stamps.push(S.lab); saveStamps(); } }
+      else if (!done.includes(S.li)) { done.push(S.li); save(); }
       S.phase = 'done';
       break;
     default: return;
   }
   render();
-  if (['open','home','next','prev','start','finish','round'].includes(d.a)) window.scrollTo(0,0);
+  if (['open','lab','home','next','prev','start','finish','round'].includes(d.a)) window.scrollTo(0,0);
 });
 
 app.addEventListener('input', e => {
@@ -836,7 +885,7 @@ async function upload(){
 }
 
 /* ---------- 입구·메뉴 (주소 #class #arcade #board 로 바로 열 수 있음) ---------- */
-const VIEWS = ['entry','class','arcade','board'];
+const VIEWS = ['entry','class','lab','arcade','board'];
 const LAST_KEY = 'hi-playground-last-game';
 const ICON_BOOK = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 9c5-2 10-2 14 1v23c-4-3-9-3-14-1z" fill="var(--leaf)"/><path d="M34 9c-5-2-10-2-14 1v23c4-3 9-3 14-1z" fill="var(--sky)"/></svg>';
 const ICON_PAD = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="4" y="11" width="32" height="20" rx="10" fill="var(--coral)"/><rect x="10" y="19" width="8" height="3" rx="1" fill="var(--surface)"/><rect x="12.5" y="16.5" width="3" height="8" rx="1" fill="var(--surface)"/><circle cx="26" cy="18" r="2.2" fill="var(--sun)"/><circle cx="30" cy="22" r="2.2" fill="var(--sun)"/></svg>';
@@ -865,9 +914,124 @@ function aiLinks(){
     <p class="small">부모님께: 서비스마다 쓸 수 있는 나이와 가입 조건이 달라요. 가입 전에 각 서비스의 이용약관을 확인하고, 아이 계정 대신 부모님 계정으로 함께 쓰시길 권해요.</p></section>`;
 }
 
+/* ---------- AI 실험실: 주간 도전 + 이달의 실험. opens 날짜가 되면 저절로 열림 ---------- */
+// 새 콘텐츠는 이 배열에 항목만 추가한다. 모양은 수업과 같고(talk·act·remember) id·kind·opens가 더 있다
+const LAB = [
+  { id:'w2026-44', kind:'week', opens:'2026-10-26', title:'콩콩이 퀴즈', sub:'교실에서 배운 것 OX 5문제',
+    talk:[
+      ['cheer','이번 주 도전은 <b>콩콩이 퀴즈</b>! 교실에서 배운 걸 기억하나 볼까?'],
+      ['happy','틀려도 괜찮아. 헷갈리면 교실에 다시 다녀와도 돼.'],
+    ],
+    act:{type:'ox', items:[
+      {q:'AI에게 내 이름과 학교를 알려 줘도 괜찮다.', a:false, why:'이름·학교·주소·전화번호는 AI에게도 비밀이야.'},
+      {q:'질문을 자세하게 할수록 원하는 답을 받기 쉽다.', a:true, why:'맞아! AI는 말해 준 만큼만 알아.'},
+      {q:'AI가 한 말은 언제나 맞다.', a:false, why:'그럴듯하게 틀릴 때도 있어. 책이나 어른께 꼭 확인!'},
+      {q:'AI 답이 어려우면 더 쉽게 말해 달라고 다시 물어봐도 된다.', a:true, why:'맞아! 몇 번이든 다시 물어봐도 돼.'},
+      {q:'숙제는 AI에게 통째로 맡기는 게 좋다.', a:false, why:'숙제는 내 힘으로! AI에게는 모르는 걸 물어볼 때만 도움을 받아.'},
+    ]},
+    remember:['비밀은 지키고, 자세하게 묻고, 꼭 확인하기!'] },
+
+  { id:'m2026-11', kind:'month', opens:'2026-10-29', title:'다음 낱말 맞히기', sub:'AI는 어떻게 술술 말할까?',
+    talk:[
+      ['wow','AI는 어떻게 그렇게 술술 말할까? 비밀은 <b>다음 낱말 맞히기</b>야!'],
+      ['think','AI는 아주 많은 글을 읽으면서 <b>어떤 말 다음에 어떤 말이 자주 오는지</b> 배웠어.'],
+      ['happy','"오늘 아침에 밥을" 다음엔 "먹었다"가 자주 오겠지? AI는 <b>그럴듯한 낱말</b>을 하나 골라 붙이고, 또 다음 낱말을 골라. 이걸 계속해서 긴 글을 만들어.'],
+      ['think','그런데 <b>그럴듯한 말</b>이 늘 <b>맞는 말</b>은 아니야. 그래서 AI 말은 꼭 확인해야 해.'],
+      ['cheer','자, 너도 AI처럼 다음 낱말을 맞혀 볼까? 뒤의 세 문제는 한 낱말씩 이어서 이야기를 만들어!'],
+    ],
+    act:{type:'next', items:[
+      {stem:'오늘 아침에 밥을', words:[['먹었다',70],['했다',12],['샀다',8],['던졌다',1]]},
+      {stem:'비가 와서 우산을', words:[['썼다',65],['챙겼다',20],['샀다',8],['먹었다',1]]},
+      {stem:'옛날 옛날 어느 마을에', words:[['한',45],['착한',20],['작은',15],['공룡',2]]},
+      {stem:'옛날 옛날 어느 마을에 한', words:[['소년이',35],['할머니가',30],['나무꾼이',20],['로봇이',3]]},
+      {stem:'옛날 옛날 어느 마을에 한 소년이', words:[['살았어요',60],['있었어요',25],['날았어요',3],['먹었어요',2]]},
+    ]},
+    remember:['AI는 다음에 올 낱말을 하나씩 골라 이어 붙여 글을 만들어요.','가장 그럴듯한 말이 꼭 맞는 말은 아니에요. 그래서 확인!','AI는 가끔 1등이 아닌 낱말도 골라요. 그래서 같은 질문에도 답이 조금씩 달라요.'] },
+
+  { id:'w2026-45', kind:'week', opens:'2026-11-02', title:'이번 주 낱말: 환각', sub:'AI가 그럴듯하게 틀리는 것',
+    talk:[
+      ['think','AI 세계에는 <b>환각</b>이라는 낱말이 있어.'],
+      ['wow','AI가 <b>없는 일을 진짜처럼</b> 말하는 걸 환각이라고 불러. 없는 책 제목을 지어내서 알려 주기도 해.'],
+      ['think','왜 그럴까? AI는 다음에 올 <b>그럴듯한 낱말</b>을 고르는 거라서, 모르는 것도 아는 것처럼 이어 말할 때가 있거든.'],
+      ['happy','그래서 중요한 건 <b>책이나 어른께</b> 한 번 더 확인!'],
+    ],
+    act:{type:'choose', items:[
+      {q:'AI가 "『콩콩이와 달빛 공룡 학교』는 아주 유명한 동화책이야"라고 했어. 그런데 도서관에도 서점에도 그런 책이 없어. 이건 뭘까?', options:[
+        {t:'도서관이 깜빡했다', ok:false, why:'도서관에도 서점에도 없다면 AI가 지어냈을 가능성이 커.'},
+        {t:'환각: AI가 없는 책을 진짜처럼 말한 것', ok:true, why:'맞아! 그럴듯하게 들려도 없는 거야. 이런 게 바로 환각이야.'},
+      ]},
+      {q:'AI가 알려 준 게 진짜인지 궁금해. 어떻게 할까?', options:[
+        {t:'그냥 믿는다', ok:false, why:'AI도 틀릴 수 있어.'},
+        {t:'AI에게 "진짜야?"라고만 물어본다', ok:false, why:'AI는 틀린 말도 진짜라고 할 수 있어. 다른 곳에서 확인하자.'},
+        {t:'책이나 어른께 확인한다', ok:true, why:'정답! 그게 환각을 잡는 방법이야.'},
+      ]},
+    ]},
+    remember:['환각: AI가 없는 일을 진짜처럼 말하는 것','중요한 건 책이나 어른께 한 번 더 확인!'] },
+
+  { id:'w2026-46', kind:'week', opens:'2026-11-09', title:'질문 고치기', sub:'엉성한 질문을 멋진 질문으로',
+    talk:[
+      ['think','어떤 친구가 AI에게 이렇게 물었어. <b>"공룡"</b>'],
+      ['worry','이러면 AI는 공룡 이야기를 아무거나 길게 해. 뭘 알고 싶은지 모르거든.'],
+      ['cheer','네가 고쳐 줘! <b>무엇을 + 누구 눈높이 + 어떤 모양</b>, 기억나지?'],
+    ],
+    act:{type:'write', q:'"공룡"을 좋은 질문으로 고쳐 써 봐!', ph:'예) 초등학생이 알 수 있게 가장 큰 공룡 3개를 알려줘'},
+    remember:['무엇을 + 누구 눈높이 + 어떤 모양','짧은 질문보다 자세한 질문이 좋아요.'] },
+
+  { id:'w2026-47', kind:'week', opens:'2026-11-16', title:'생각 질문', sub:'정답이 없는 질문, 너라면?',
+    talk:[
+      ['think','이번 주는 정답이 없는 <b>생각 질문</b>이야.'],
+      ['happy','네 생각을 골라 봐. 콩콩이도 같이 생각해 볼게.'],
+    ],
+    act:{type:'choose', items:[
+      {q:'AI가 그린 그림으로 그림 대회에 나가도 될까?', options:[
+        {t:'안 돼. 내가 그린 게 아니니까', ok:true, why:'그렇게 생각할 수 있어. 대회는 내 솜씨를 보여 주는 자리니까.'},
+        {t:'AI로 만들었다고 말하면 돼', ok:true, why:'그것도 일리 있어. 다만 대회 규칙부터 확인해야 해. AI 그림을 받지 않는 대회도 많아.'},
+        {t:'잘 모르겠어', ok:true, why:'모르겠다는 것도 좋은 생각이야. 어른이랑 이야기해 보자.'},
+      ]},
+      {q:'AI랑 이야기하는 게 친구랑 노는 것보다 좋다는 아이가 있어. 너는 어때?', options:[
+        {t:'사람 친구가 더 좋아', ok:true, why:'콩콩이도 그렇게 생각해! 같이 웃고 뛰어놀 수 있으니까.'},
+        {t:'AI도 재밌어', ok:true, why:'재밌을 수 있어! 그래도 AI는 진짜 마음이 없다는 건 기억해 줘.'},
+        {t:'둘 다 좋아', ok:true, why:'좋은 생각이야. 대신 AI 쓰는 시간은 정해 두자.'},
+      ]},
+    ]},
+    remember:['생각 질문엔 정답이 없어요. 내 생각을 말해 보는 게 중요해요.','헷갈리면 어른이랑 이야기해요.'] },
+];
+const TODAY = new URLSearchParams(location.search).get('today') || new Date().toLocaleDateString('sv-SE'); // ?today=2026-11-10 로 미리보기
+const STAMP_KEY = 'hi-playground-stamps';
+let stamps = (() => { try { return JSON.parse(localStorage.getItem(STAMP_KEY)) || []; } catch(e){ return []; } })();
+function saveStamps(){ try { localStorage.setItem(STAMP_KEY, JSON.stringify(stamps)); } catch(e){} }
+function labNow(){
+  const open = LAB.filter(x => x.opens <= TODAY).sort((a, b) => a.opens < b.opens ? -1 : 1);
+  const last = k => open.filter(x => x.kind === k).pop();
+  const soon = LAB.filter(x => x.opens > TODAY).sort((a, b) => a.opens < b.opens ? -1 : 1)[0];
+  return { open, week:last('week'), month:last('month'), soon };
+}
+function labCard(x, tag, main){
+  return `<button class="labcard ${main ? 'main' : ''}" data-a="lab" data-id="${x.id}">
+    <span class="tag">${tag}</span><span class="tx"><b>${x.title}</b><small>${x.sub}</small></span>
+    ${stamps.includes(x.id) ? '<span class="ok">도장 ✔</span>' : '<span class="go">▶</span>'}</button>`;
+}
+function labHTML(){
+  const { open, week, month, soon } = labNow();
+  const n = stamps.length, slots = Math.max(4, Math.ceil(n / 4) * 4);
+  const say = n >= 4 ? '도장 4개를 모아서 내 안테나가 반짝반짝해! 고마워!'
+    : '여기는 <b>AI 실험실</b>! 매주 새 도전, 매달 새 실험이 열려. 하나 끝낼 때마다 도장 쾅!';
+  const past = open.filter(x => x !== week && x !== month).reverse()
+    .map(x => labCard(x, x.kind === 'month' ? '지난 실험' : '지난 도전')).join('');
+  const d = soon && new Date(soon.opens + 'T00:00');
+  return stage(n >= 4 ? 'cheer' : 'wow', say) + `<div class="doors">
+    ${week ? labCard(week, '이번 주 도전', !stamps.includes(week.id)) : ''}
+    ${month ? labCard(month, '이달의 실험', !stamps.includes(month.id)) : ''}
+    ${soon ? `<p class="small">다음 도전은 <b>${d.getMonth() + 1}월 ${d.getDate()}일</b>에 열려요.</p>` : ''}</div>
+    <section class="arcade"><h2>도장판</h2>
+      <div class="stamps">${Array.from({length:slots}, (_, k) => `<i class="${k < n ? 'on' : ''}">${k < n ? '🧪' : ''}</i>`).join('')}</div>
+      <p>${n >= 4 ? '보상: 콩콩이 안테나가 반짝여요!' : `도장 4개를 모으면 콩콩이 안테나가 반짝여요. 지금 <b>${n}</b>개`}</p></section>
+    ${past ? `<section class="arcade"><h2>지난 실험실</h2><div class="doors">${past}</div></section>` : ''}`;
+}
+
 function nav(){
-  const t = [['entry','홈'],['class','교실'],['arcade','오락실'],['board','점수판']];
-  const cur = S.view === 'lesson' ? 'class' : S.view;
+  const t = [['entry','홈'],['class','교실'],['lab','실험실'],['arcade','오락실'],['board','점수판']];
+  const cur = S.view === 'lesson' ? (S.lab ? 'lab' : 'class') : S.view;
   return `<nav class="tabs" aria-label="메뉴">${t.map(([v, n]) => `<button class="${cur === v ? 'on' : ''}" data-a="tab" data-v="${v}" ${cur === v ? 'aria-current="page"' : ''}>${n}</button>`).join('')}</nav>`;
 }
 function entry(next){
@@ -882,7 +1046,10 @@ function entry(next){
       <span class="ic">${ICON_PAD}</span><span class="tx"><b>놀기</b><small>추억의 오락실 게임 ${GAMES.length}종</small></span><span class="go">▶</span></button>`;
   let last = '';
   try { const g = GAMES.find(x => x[0] === localStorage.getItem(LAST_KEY)); if (g) last = `<a class="lastgame" href="games/${g[0]}/index.html" data-g="${g[0]}">지난번에 한 게임 <b>${g[1]}</b> 한 판 더 ▶</a>`; } catch(e){}
-  return stage(allDone ? 'cheer' : 'happy', say) + `<div class="doors">${allDone ? play + learn : learn + play}${last}</div>`;
+  const w = labNow().week, fresh = w && !stamps.includes(w.id);
+  const lab = `<button class="door lab" data-a="tab" data-v="lab">
+      <span class="ic">🧪</span><span class="tx"><b>실험실</b><small>${fresh ? `새 도전: ${w.title}` : '이번 주 도전 · 이달의 실험'}</small></span><span class="go">▶</span></button>`;
+  return stage(allDone ? 'cheer' : 'happy', say) + `<div class="doors">${allDone ? play + lab + learn : learn + lab + play}${last}</div>`;
 }
 function go(v){
   if (!VIEWS.includes(v)) v = 'entry';
