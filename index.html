@@ -841,7 +841,7 @@ const ICON_BOOK = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 9c5-2
 const ICON_PAD = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="4" y="11" width="32" height="20" rx="10" fill="var(--coral)"/><rect x="10" y="19" width="8" height="3" rx="1" fill="var(--surface)"/><rect x="12.5" y="16.5" width="3" height="8" rx="1" fill="var(--surface)"/><circle cx="26" cy="18" r="2.2" fill="var(--sun)"/><circle cx="30" cy="22" r="2.2" fill="var(--sun)"/></svg>';
 
 function nav(){
-  const t = [['class','교실'],['arcade','오락실'],['board','점수판']];
+  const t = [['entry','홈'],['class','교실'],['arcade','오락실'],['board','점수판']];
   const cur = S.view === 'lesson' ? 'class' : S.view;
   return `<nav class="tabs" aria-label="메뉴">${t.map(([v, n]) => `<button class="${cur === v ? 'on' : ''}" data-a="tab" data-v="${v}" ${cur === v ? 'aria-current="page"' : ''}>${n}</button>`).join('')}</nav>`;
 }
