@@ -151,6 +151,7 @@ textarea{width:100%;box-sizing:border-box;min-height:110px;border:2px solid var(
 .game span{padding:8px 10px 10px;min-width:0}
 .game b{display:block;font-family:var(--display);font-weight:400;font-size:17px}
 .game small{display:block;font-size:13px;color:var(--muted);line-height:1.4}
+.game.locked{opacity:.55;border-style:dashed;cursor:not-allowed}
 .game:hover{border-color:var(--coral)}
 @media (max-width:560px){.games{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
@@ -848,10 +849,16 @@ const AI_LINKS = [
   ['Copilot','Microsoft','https://copilot.microsoft.com/'],
 ];
 function aiLinks(){
-  const cards = AI_LINKS.map(([n, by, url]) => `<a class="game" href="${url}" target="_blank" rel="noopener">
-    <span><b>${n}</b><small>${by} · 새 창으로 열려요</small></span></a>`).join('');
+  const open = done.length >= LESSONS.length; // 인증서 = 수업 10개 모두 끝냄
+  const cards = AI_LINKS.map(([n, by, url]) => open
+    ? `<a class="game" href="${url}" target="_blank" rel="noopener">
+    <span><b>${n}</b><small>${by} · 새 창으로 열려요</small></span></a>`
+    : `<div class="game locked" aria-disabled="true">
+    <span><b>🔒 ${n}</b><small>${by} · 인증서를 받으면 열려요</small></span></div>`).join('');
+  const lead = open ? '배운 걸 진짜 AI에게 해 볼 차례야! 꼭 <b>엄마·아빠랑 같이</b> 골라서 써 봐.'
+    : `수업 10개를 모두 끝내고 <b>인증서</b>를 받으면 열려! 지금 <b>${done.length} / ${LESSONS.length}</b>`;
   return `<section class="arcade"><h2>진짜 AI 써 보기</h2>
-    <p>배운 걸 진짜 AI에게 해 볼 차례야! 꼭 <b>엄마·아빠랑 같이</b> 골라서 써 봐.</p>
+    <p>${lead}</p>
     <div class="memo"><h3>쓰기 전에 약속</h3><ul>
       <li>이름·주소·학교·전화번호·사진은 비밀</li><li>AI 말은 꼭 한 번 더 확인</li><li>이상하면 멈추고 어른께</li></ul></div>
     <div class="games">${cards}</div>
