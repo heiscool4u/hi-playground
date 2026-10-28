@@ -51,7 +51,7 @@ button{font:inherit;color:inherit}
 
 /* 머리줄 */
 .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-.top-r{display:flex;align-items:center;gap:8px}
+.top-r{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .share{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 14px;cursor:pointer;font-family:var(--display);font-size:16px;white-space:nowrap}
 .brand{font-family:var(--display);font-size:24px;line-height:1.2}
 .brand small{display:block;font-family:var(--text);font-size:13px;color:var(--muted)}
@@ -351,6 +351,91 @@ const GAMES = [
   ['09-cave-runner','동굴 소년 모험','점프로 들판·동굴·화산을 건너요'],
 ];
 
+/* ---------- 소리: 효과음 + 배경음악 (Web Audio로 직접 합성, 파일 없음) ---------- */
+const SND = (() => {
+  const PREF = 'hi-playground-sound';
+  let pref = { music:true, sfx:true };
+  try { Object.assign(pref, JSON.parse(localStorage.getItem(PREF)) || {}); } catch(e){}
+  const keep = () => { try { localStorage.setItem(PREF, JSON.stringify(pref)); } catch(e){} };
+  let ctx = null, master, bgm, noise, timer = null, step = 0, nextT = 0;
+  const mf = m => 440 * Math.pow(2, (m - 69) / 12);
+
+  function init(){
+    if (ctx) return ctx;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+    bgm = ctx.createGain(); bgm.gain.value = 0.6; bgm.connect(master);
+    noise = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
+    const ch = noise.getChannelData(0);
+    for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+    return ctx;
+  }
+  function tone(f, t, dur, type, vol, dest){
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest || master);
+    o.start(t); o.stop(t + dur + 0.02);
+    return o;
+  }
+  function hat(t){
+    const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    s.buffer = noise; f.type = 'highpass'; f.frequency.value = 6000;
+    g.gain.setValueAtTime(0.025, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+    s.connect(f); f.connect(g); g.connect(bgm); s.start(t);
+  }
+  const FX = {
+    tap:   t => tone(660, t, 0.06, 'triangle', 0.12),
+    pick:  t => { tone(520, t, 0.07, 'square', 0.05); tone(780, t + 0.05, 0.08, 'square', 0.05); },
+    right: t => { tone(mf(76), t, 0.14, 'square', 0.07); tone(mf(84), t + 0.12, 0.3, 'square', 0.07); },
+    wrong: t => { const o = tone(240, t, 0.32, 'sawtooth', 0.05); o.frequency.exponentialRampToValueAtTime(130, t + 0.3); },
+    star:  t => { [72,76,79,84].forEach((m, i) => tone(mf(m), t + i * 0.09, 0.22, 'square', 0.06)); tone(mf(88), t + 0.38, 0.6, 'triangle', 0.12); },
+  };
+
+  // 8마디 반복 곡(C-G-Am-F), 8분음표 단위. 0은 쉼표
+  const MEL = [
+    [72,0,76,79,76,0,74,72],[71,0,74,79,77,76,74,0],[72,0,76,81,79,0,76,74],[72,74,76,77,76,0,0,0],
+    [79,0,79,81,79,76,72,0],[74,0,74,76,74,71,67,0],[69,72,76,72,77,76,74,72],[74,0,72,0,72,0,0,0],
+  ];
+  const BASS = [48,43,45,41,48,43,45,43];
+  const E = 60 / 112 / 2;
+  function sched(){
+    while (nextT < ctx.currentTime + 0.15){
+      const bar = Math.floor(step / 8), i = step % 8;
+      const m = MEL[bar][i];
+      if (m) tone(mf(m), nextT, E * 0.9, 'square', 0.03, bgm);
+      const b = [BASS[bar],0,BASS[bar]+12,0,BASS[bar],0,BASS[bar]+12,0][i];
+      if (b) tone(mf(b), nextT, E * 0.9, 'triangle', 0.09, bgm);
+      if (i % 2 === 1) hat(nextT);
+      nextT += E; step = (step + 1) % 64;
+    }
+  }
+  function start(){
+    if (!pref.music || timer || document.hidden || !init()) return;
+    ctx.resume();
+    nextT = ctx.currentTime + 0.05;
+    timer = setInterval(sched, 25);
+  }
+  function stop(){ clearInterval(timer); timer = null; }
+
+  // 브라우저는 사용자가 한 번 누른 뒤에만 소리를 허락한다
+  document.addEventListener('pointerdown', start);
+  document.addEventListener('keydown', start);
+  document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
+
+  return {
+    get music(){ return pref.music; },
+    get sfx(){ return pref.sfx; },
+    play(name){ if (!pref.sfx || !init()) return; ctx.resume(); FX[name](ctx.currentTime + 0.01); },
+    toggleMusic(){ pref.music = !pref.music; keep(); pref.music ? start() : stop(); },
+    toggleSfx(){ pref.sfx = !pref.sfx; keep(); },
+  };
+})();
+
 /* ---------- 콩콩이 그림 ---------- */
 function bot(mood){
   const faces = {
@@ -385,6 +470,8 @@ let S = { view:'home' };
 function header(){
   return `<div class="top"><div class="brand">하이놀이터<small>콩콩이의 AI 교실 · AI랑 똑똑하게 지내는 법 10가지</small></div>
     <div class="top-r"><button class="share" data-a="share">친구에게 알려주기</button>
+    <button class="share" data-a="music" aria-pressed="${SND.music}">${SND.music ? '음악 끄기' : '음악 켜기'}</button>
+    <button class="share" data-a="sfx" aria-pressed="${SND.sfx}">${SND.sfx ? '소리 끄기' : '소리 켜기'}</button>
     <div class="score" title="받은 별">${STAR}${done.length} / 10</div></div></div>`;
 }
 
@@ -422,6 +509,7 @@ function home(){
       <li>3·8·10번 수업에서 만든 질문은 복사해서 아이와 같이 실제 AI에 넣어 보세요.</li>
       <li>진행 기록(별)은 이 기기의 브라우저에만 저장돼요.</li>
       <li>오락실 게임에서 지도로 돌아올 땐 브라우저의 뒤로 가기를 눌러 주세요.</li>
+      <li>배경음악과 효과음은 맨 위 버튼으로 따로 끌 수 있고, 고른 설정은 기억돼요.</li>
     </ul></details>`;
 }
 
@@ -544,7 +632,10 @@ app.addEventListener('click', e => {
   const b = e.target.closest('[data-a]');
   if (!b || b.disabled) return;
   const d = b.dataset, L = LESSONS[S.li];
+  if (['home','open','nextlesson','next','prev','start','round','copy','share','sfx'].includes(d.a)) SND.play('tap');
   switch (d.a){
+    case 'music': SND.toggleMusic(); break;
+    case 'sfx': SND.toggleSfx(); break;
     case 'home': S = { view:'home' }; break;
     case 'open': return openLesson(+d.i);
     case 'nextlesson': return openLesson(S.li + 1);
@@ -554,6 +645,7 @@ app.addEventListener('click', e => {
     case 'ox': {
       const it = L.act.items[S.r], v = d.v === '1', ok = v === it.a;
       S.ans = { v, ok }; S.mood = ok ? 'cheer' : 'worry';
+      SND.play(ok ? 'right' : 'wrong');
       S.say = (ok ? '딩동댕! ' : '앗, 아니야! ') + it.why;
       break;
     }
@@ -561,7 +653,8 @@ app.addEventListener('click', e => {
       const o = L.act.items[S.r].options[+d.k];
       if (S.ans && S.ans.ok) break;
       if (!o.ok && !S.tried.includes(+d.k)) S.tried.push(+d.k);
-      S.ans = { ok:o.ok }; S.mood = o.ok ? 'cheer' : 'think'; S.say = o.why + (o.ok ? '' : ' 다른 걸 골라 볼까?');
+      S.ans = { ok:o.ok }; S.mood = o.ok ? 'cheer' : 'think';
+      SND.play(o.ok ? 'right' : 'wrong'); S.say = o.why + (o.ok ? '' : ' 다른 걸 골라 볼까?');
       break;
     }
     case 'round': S.r++; S.ans = null; S.tried = []; S.mood = 'happy'; S.say = '다음 문제! 잘 읽고 골라 봐.'; break;
@@ -571,11 +664,13 @@ app.addEventListener('click', e => {
       const ok = v === it.safe;
       const all = L.act.items.every((x, k) => S.sorted[k] === x.safe);
       S.mood = all ? 'cheer' : ok ? 'happy' : 'worry';
+      SND.play(ok ? 'right' : 'wrong');
       S.say = all ? '전부 맞혔어! 너는 비밀 지킴이야.' : ok ? `맞아! "${it.t}"${it.safe ? '는 써도 괜찮아.' : '는 꼭 비밀!'}` : `다시 생각해 봐. "${it.t}"로 나를 알아볼 수 있을까?`;
       break;
     }
     case 'chip': {
       S.chosen[+d.g] = +d.k;
+      SND.play('pick');
       const full = L.act.groups.every((_, gi) => S.chosen[gi] !== undefined);
       S.mood = full ? 'cheer' : 'happy';
       S.say = full ? '완성! 이 질문을 복사해서 엄마·아빠랑 진짜 AI에게 물어봐도 좋아.' : '좋아! 다른 재료도 골라 봐.';
@@ -584,6 +679,7 @@ app.addEventListener('click', e => {
     case 'copy': return copyPrompt();
     case 'share': return sharePage();
     case 'finish':
+      SND.play('star');
       if (!done.includes(S.li)) { done.push(S.li); save(); }
       S.phase = 'done';
       break;
