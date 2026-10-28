@@ -154,6 +154,32 @@ textarea{width:100%;box-sizing:border-box;min-height:110px;border:2px solid var(
 .game:hover{border-color:var(--coral)}
 @media (max-width:560px){.games{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
+/* 입구: 배우기·놀기 문 */
+.doors{display:flex;flex-direction:column;gap:14px;margin-top:20px}
+.door{display:flex;align-items:center;gap:16px;width:100%;box-sizing:border-box;padding:18px 20px;border-radius:24px;border:2px solid var(--line);background:var(--surface);color:var(--ink);text-align:left;cursor:pointer;text-decoration:none;font:inherit}
+.door.main{border-color:var(--coral);box-shadow:0 5px 0 var(--coral-deep)}
+.door .ic{flex:none;width:64px;height:64px;border-radius:20px;display:grid;place-items:center}
+.door .ic svg{width:40px;height:40px}
+.door.learn .ic{background:var(--leaf-soft)} .door.play .ic{background:var(--sun-soft)}
+.door .tx{min-width:0;flex:1}
+.door b{display:block;font-family:var(--display);font-weight:400;font-size:26px;line-height:1.25}
+.door small{display:block;font-size:16px;color:var(--muted)}
+.door .go{font-family:var(--display);font-size:22px;color:var(--coral-deep)}
+.lastgame{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;padding:6px 4px;font-size:16px}
+.lastgame b{font-family:var(--display);font-weight:400;color:var(--coral-deep)}
+
+/* 메뉴: 폰은 화면 아래 고정, 넓은 화면은 머리줄 아래 */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;background:var(--surface);border-top:2px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+.tabs button{flex:1;padding:12px 4px 14px;border:0;background:none;font-family:var(--display);font-size:18px;color:var(--muted);cursor:pointer;border-top:4px solid transparent}
+.tabs button.on{color:var(--coral-deep);border-top-color:var(--coral)}
+@media (min-width:720px){
+  .tabs{position:static;background:none;border:0;padding:0;gap:8px;margin:-4px 0 20px}
+  .tabs button{flex:none;border:2px solid var(--line);border-radius:999px;padding:7px 20px;font-size:17px;color:var(--ink)}
+  .tabs button.on{background:var(--coral);border-color:var(--coral);color:var(--coral-ink)}
+}
+@media (max-width:719px){.wrap{padding-block:14px 104px}}
+.brand{cursor:pointer}
+
 /* 친구 점수판 */
 .board{margin-top:34px;display:flex;flex-direction:column;gap:12px}
 .board h2{font-size:26px}
@@ -483,7 +509,7 @@ const app = document.getElementById('app');
 let S = { view:'home' };
 
 function header(){
-  return `<div class="top"><div class="brand">하이놀이터<small>콩콩이의 AI 교실 · AI랑 똑똑하게 지내는 법 10가지</small></div>
+  return `<div class="top"><div class="brand" data-a="tab" data-v="entry" role="link" tabindex="0">하이놀이터<small>콩콩이의 AI 교실 · AI랑 똑똑하게 지내는 법 10가지</small></div>
     <div class="top-r"><button class="share" data-a="share">친구에게 알려주기</button>
     <button class="share" data-a="music" aria-pressed="${SND.music}">${SND.music ? '음악 끄기' : '음악 켜기'}</button>
     <button class="share" data-a="sfx" aria-pressed="${SND.sfx}">${SND.sfx ? '소리 끄기' : '소리 켜기'}</button>
@@ -513,17 +539,20 @@ function home(){
       <ol><li>자세하게 물어봐요</li><li>어려우면 다시 물어봐요</li><li>AI 말은 꼭 확인해요</li><li>비밀은 지켜요</li><li>숙제는 내 힘으로</li><li>이상하면 멈추고 어른께</li></ol>
       <p class="small">${new Date().toLocaleDateString('ko-KR')}</p></section>` : '';
 
-  const games = GAMES.map(([dir, name, desc]) => `<a class="game" href="games/${dir}/index.html">
+  const games = GAMES.map(([dir, name, desc]) => `<a class="game" href="games/${dir}/index.html" data-g="${dir}">
       <img src="games/${dir}/og.png" alt="" loading="lazy"><span><b>${name}</b><small>${desc}</small></span></a>`).join('');
   const arcade = `<section class="arcade"><h2>추억의 오락실</h2>
-    <p>공부했으면 한 판! 키보드도 되고 화면 터치도 돼요.</p><div class="games">${games}</div></section>`;
+    <p>언제든 한 판! 키보드도 되고 화면 터치도 돼요.</p><div class="games">${games}</div></section>`;
 
-  return header() + stage(next === -1 ? 'cheer' : 'happy', say) + `<div class="map">${stops}</div>` + cert + arcade + boardHTML() + `
+  if (S.view === 'arcade') return arcade;
+  if (S.view === 'board') return boardHTML();
+  if (S.view === 'class') return stage(next === -1 ? 'cheer' : 'happy', say) + `<div class="map">${stops}</div>` + cert;
+  return entry(next) + `
     <details class="parents"><summary>부모님께</summary><ul>
       <li>수업 하나는 3~5분이면 끝나요. 하루에 1~2개씩 함께 보시길 권해요.</li>
       <li>3·8·10번 수업에서 만든 질문은 복사해서 아이와 같이 실제 AI에 넣어 보세요.</li>
       <li>진행 기록(별)은 이 기기의 브라우저에만 저장돼요.</li>
-      <li>오락실 게임에서 지도로 돌아올 땐 브라우저의 뒤로 가기를 눌러 주세요.</li>
+      <li>수업을 하지 않아도 오락실 게임은 언제든 할 수 있어요. 게임에서 돌아올 땐 뒤로 가기를 눌러 주세요.</li>
       <li>배경음악과 효과음은 맨 위 버튼으로 따로 끌 수 있고, 고른 설정은 기억돼요.</li>
     </ul></details>`;
 }
@@ -551,7 +580,7 @@ function lesson(){
       <div class="row end"><button class="btn ghost" data-a="home">지도로</button>
       ${S.li < LESSONS.length - 1 ? '<button class="btn" data-a="nextlesson">다음 수업</button>' : '<button class="btn" data-a="home">인증서 보러 가기</button>'}</div></div>`;
   }
-  return header() + `<div class="lhead"><button class="back" data-a="home">← 지도로</button><div class="dots">${dots}</div></div>
+  return `<div class="lhead"><button class="back" data-a="home">← 지도로</button><div class="dots">${dots}</div></div>
     <h1 class="ltitle"><em>${S.li+1}</em>${L.title}</h1>` + body;
 }
 
@@ -629,8 +658,8 @@ function updateWrite(){
 }
 
 function render(){
-  app.innerHTML = S.view === 'home' ? home() : lesson();
-  if (S.view === 'home' && B.rows === null && !B.loading){ B.loading = true; loadBoard().finally(() => { B.loading = false; }); }
+  app.innerHTML = header() + nav() + (S.view === 'lesson' ? lesson() : home());
+  if (S.view === 'board' && B.rows === null && !B.loading){ B.loading = true; loadBoard().finally(() => { B.loading = false; }); }
   if (S.view === 'lesson' && S.phase === 'act' && LESSONS[S.li].act.type === 'write') updateWrite();
 }
 function openLesson(i){
@@ -645,6 +674,8 @@ function startAct(){
 }
 
 app.addEventListener('click', e => {
+  const ga = e.target.closest('a[data-g]');
+  if (ga) { try { localStorage.setItem(LAST_KEY, ga.dataset.g); } catch(err){} return; }
   const b = e.target.closest('[data-a]');
   if (!b || b.disabled) return;
   const d = b.dataset, L = LESSONS[S.li];
@@ -652,7 +683,8 @@ app.addEventListener('click', e => {
   switch (d.a){
     case 'music': SND.toggleMusic(); break;
     case 'sfx': SND.toggleSfx(); break;
-    case 'home': S = { view:'home' }; break;
+    case 'home': return go('class');
+    case 'tab': return go(d.v);
     case 'open': return openLesson(+d.i);
     case 'nextlesson': return openLesson(S.li + 1);
     case 'next': S.ti++; break;
@@ -784,7 +816,7 @@ async function sb(path, opt = {}){
 async function loadBoard(){
   try { B.rows = await sb(`/top_scores?select=nickname,score&game=eq.${encodeURIComponent(B.game)}&order=score.desc&limit=10`); }
   catch(e){ B.rows = false; }
-  if (S.view === 'home') render();
+  if (S.view === 'board') render();
 }
 async function upload(){
   const n = nick.trim();
@@ -802,6 +834,42 @@ async function upload(){
   B.rows = null; render(); loadBoard();
 }
 
+/* ---------- 입구·메뉴 (주소 #class #arcade #board 로 바로 열 수 있음) ---------- */
+const VIEWS = ['entry','class','arcade','board'];
+const LAST_KEY = 'hi-playground-last-game';
+const ICON_BOOK = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 9c5-2 10-2 14 1v23c-4-3-9-3-14-1z" fill="var(--leaf)"/><path d="M34 9c-5-2-10-2-14 1v23c4-3 9-3 14-1z" fill="var(--sky)"/></svg>';
+const ICON_PAD = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="4" y="11" width="32" height="20" rx="10" fill="var(--coral)"/><rect x="10" y="19" width="8" height="3" rx="1" fill="var(--surface)"/><rect x="12.5" y="16.5" width="3" height="8" rx="1" fill="var(--surface)"/><circle cx="26" cy="18" r="2.2" fill="var(--sun)"/><circle cx="30" cy="22" r="2.2" fill="var(--sun)"/></svg>';
+
+function nav(){
+  const t = [['class','교실'],['arcade','오락실'],['board','점수판']];
+  const cur = S.view === 'lesson' ? 'class' : S.view;
+  return `<nav class="tabs" aria-label="메뉴">${t.map(([v, n]) => `<button class="${cur === v ? 'on' : ''}" data-a="tab" data-v="${v}" ${cur === v ? 'aria-current="page"' : ''}>${n}</button>`).join('')}</nav>`;
+}
+function entry(next){
+  const allDone = next === -1;
+  const say = allDone ? '수업을 다 끝낸 <b>AI 탐험가</b>구나! 오늘은 실컷 놀자!'
+    : done.length ? '왔구나! 오늘은 뭐 하고 놀까?' : '안녕! 나는 <b>콩콩이</b>야. 오늘은 뭐 하고 놀까?';
+  const learnLine = allDone ? '인증서 보기 · 다시 복습하기'
+    : done.length ? `${next+1}번 "${LESSONS[next].title}" 이어서 하기` : '1번 "AI는 누구일까?"부터 시작';
+  const learn = `<button class="door learn ${allDone ? '' : 'main'}" ${allDone ? 'data-a="tab" data-v="class"' : `data-a="open" data-i="${next}"`}>
+      <span class="ic">${ICON_BOOK}</span><span class="tx"><b>배우기</b><small>${learnLine}</small></span><span class="go">▶</span></button>`;
+  const play = `<button class="door play ${allDone ? 'main' : ''}" data-a="tab" data-v="arcade">
+      <span class="ic">${ICON_PAD}</span><span class="tx"><b>놀기</b><small>추억의 오락실 게임 ${GAMES.length}종</small></span><span class="go">▶</span></button>`;
+  let last = '';
+  try { const g = GAMES.find(x => x[0] === localStorage.getItem(LAST_KEY)); if (g) last = `<a class="lastgame" href="games/${g[0]}/index.html" data-g="${g[0]}">지난번에 한 게임 <b>${g[1]}</b> 한 판 더 ▶</a>`; } catch(e){}
+  return stage(allDone ? 'cheer' : 'happy', say) + `<div class="doors">${allDone ? play + learn : learn + play}${last}</div>`;
+}
+function go(v){
+  if (!VIEWS.includes(v)) v = 'entry';
+  const h = v === 'entry' ? '' : '#' + v;
+  S = { view:v };
+  if (location.hash !== h) { try { history.pushState(null, '', h || location.pathname + location.search); } catch(e){} }
+  render(); window.scrollTo(0,0);
+}
+function fromHash(){ const v = location.hash.slice(1); S = { view: VIEWS.includes(v) ? v : 'entry' }; }
+window.addEventListener('popstate', () => { fromHash(); render(); });
+window.addEventListener('hashchange', () => { fromHash(); render(); });
+
 const SITE = 'https://heiscool4u.github.io/hi-playground/';
 function sharePage(){
   const say = msg => { const bb = document.querySelector('.bubble'); if (bb) bb.innerHTML = msg; };
@@ -815,6 +883,7 @@ function sharePage(){
   } catch(e){ show(); }
 }
 
+fromHash();
 render();
 </script>
 </body>
