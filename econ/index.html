@@ -136,6 +136,7 @@ button{font:inherit;color:inherit}
 .mbar.goal i{background:var(--leaf)}
 .icon{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;cursor:pointer;font-family:var(--display);font-size:16px;white-space:nowrap}
 .money{display:flex;gap:6px;flex-wrap:wrap}
+.tag{display:inline-block;font-weight:700;font-size:13px;border:2px solid currentColor;border-radius:999px;padding:0 8px;margin-right:4px}
 .news{background:var(--surface);border:2px dashed var(--sun);border-radius:14px;padding:8px 12px;font-size:15px;margin-top:8px}
 
 /* 시장 */
@@ -259,6 +260,9 @@ const GLOSS = {
   '국채':'나라가 돈을 빌리면서 내주는 채권이에요. 아주 안전한 편이에요.',
   '회사채':'회사가 돈을 빌리면서 내주는 채권이에요. 국채보다 이자를 더 주는 대신 위험도 더 커요.',
   '만기':'빌려준 돈을 돌려받기로 약속한 날이에요.',
+  '금리':'돈을 빌리고 빌려줄 때 붙는 이자의 비율이에요. 금리가 오르면 저금 이자도, 빌린 돈 이자도 올라요.',
+  '호재':'주식이나 채권 값이 오르게 만드는 좋은 소식이에요.',
+  '악재':'주식이나 채권 값이 내리게 만드는 나쁜 소식이에요.',
   '위험':'돈을 잃을 수도 있는 정도예요. 많이 벌 수 있는 곳일수록 보통 위험도 커요.',
   '투자':'돈이 불어나기를 바라며 주식·채권 같은 곳에 돈을 넣는 것이에요. 잃을 수도 있어요.',
   '주식':'회사를 아주 잘게 나눈 조각이에요. 주식을 사면 그 회사의 작은 주인이 돼요.',
@@ -350,14 +354,16 @@ const COURSES = [
       ['cheer','채권을 사면 정해진 [[이자]]를 받고, 약속한 날인 [[만기]]가 되면 빌려준 돈, [[원금]]을 돌려받아.'],
       ['wow','나라가 빌리는 [[국채]]는 아주 안전한 편이야. [[회사채]]는 이자를 더 주지만, 회사가 어려워지면 못 돌려받을 수도 있어.'],
       ['think','이자를 더 준다는 건 그만큼 [[위험]]도 크다는 뜻일 때가 많아. 꼭 기억해!'],
-      ['happy','진짜로는 만기 전에 채권을 팔 수도 있는데, 게임에서는 만기까지 기다려야 돌려받아.'],
+      ['happy','채권은 만기 전에 다른 사람에게 팔 수도 있어. 그때 값은 소식에 따라 오르내리고, 만기까지 기다리면 [[원금]]을 그대로 돌려받아.'],
+      ['wow','채권 값을 가장 크게 움직이는 건 [[금리]]야. 금리가 오르면 새로 나오는 채권이 이자를 더 주니까, 옛날 채권은 인기가 떨어져서 값이 내려. 금리가 내리면 반대로 올라.'],
     ],
     act:{type:'ox', items:[
       {q:'채권은 돈을 빌려줬다는 약속 증서다.', a:true, why:'맞아! 빌려준 대가로 이자를 받아.'},
       {q:'만기가 되면 빌려준 돈을 돌려받는다.', a:true, why:'맞아! 만기는 돌려받기로 약속한 날이야.'},
       {q:'이자를 많이 줄수록 언제나 더 안전하다.', a:false, why:'반대일 때가 많아. 이자를 많이 주는 곳은 위험도 큰 편이야.'},
+      {q:'금리가 오르면 이미 갖고 있는 채권 값은 보통 내린다.', a:true, why:'맞아! 새 채권이 이자를 더 주니까 옛날 채권은 인기가 떨어져.'},
     ]},
-    remember:['채권은 돈을 빌려주고 이자를 받는 약속이에요.','이자가 높으면 위험도 높은 편이에요.'] },
+    remember:['채권은 돈을 빌려주고 이자를 받는 약속이에요.','이자가 높으면 위험도 높은 편이에요.','금리가 오르면 채권 값은 내려요.'] },
 
   { title:'주식은 무엇일까?', sub:'회사의 작은 주인',
     talk:[
@@ -384,10 +390,12 @@ const COURSES = [
     talk:[
       ['happy','주식 한 주의 가격을 [[주가]]라고 해.'],
       ['wow','사려는 사람이 많으면 값이 오르고, 팔려는 사람이 많으면 값이 내려. 인기 많은 한정판 장난감 값이 오르는 것과 비슷해!'],
-      ['think','회사가 장사를 잘할 것 같은 소식이 들리면 사려는 사람이 늘어. 나쁜 소식이 들리면 팔려는 사람이 늘지.'],
+      ['think','값을 오르게 하는 좋은 소식을 [[호재]], 내리게 하는 나쁜 소식을 [[악재]]라고 해. 회사가 장사를 잘할 것 같은 호재가 들리면 사려는 사람이 늘고, 악재가 들리면 팔려는 사람이 늘어.'],
+      ['wow','회사 소식만 있는 게 아니야. [[금리]]가 오르내리거나 세계 경제가 좋아지고 나빠지는 것처럼, 나라와 세계의 소식은 주식과 채권 값을 한꺼번에 움직여. 금리가 오르면 은행에 맡기려는 사람이 늘어서 주가가 내리기 쉬워.'],
       ['cheer','산 값보다 비싸게 팔면 [[수익]], 싸게 팔면 [[손해]]야. 얼마나 늘었는지 %로 나타낸 걸 [[수익률]]이라고 해.'],
       ['worry','그런데 내일 주가가 오를지 내릴지 정확히 아는 사람은 <b>아무도 없어</b>.'],
       ['happy','이제 <b>시장</b>이 열렸어! 사기 전에 그 회사가 무슨 일을 하는지 먼저 읽어 봐. 우리나라에선 오르면 빨강, 내리면 파랑으로 보여 줘.'],
+      ['cheer','게임에도 가끔 📰 뉴스가 나와. 호재엔 빨간 딱지, 악재엔 파란 딱지가 붙어. 하지만 호재가 나와도 값이 꼭 오르는 건 아니야!'],
     ],
     act:{type:'choose', items:[
       {q:'100코인에 산 주식을 120코인에 팔았어.', options:[
@@ -399,8 +407,16 @@ const COURSES = [
         {t:'주가가 오를 가능성이 커', ok:true, why:'맞아! 사려는 사람이 많으면 값이 올라.'},
         {t:'주가가 내릴 가능성이 커', ok:false, why:'팔려는 사람이 많을 때 내려.'},
       ]},
+      {q:'"새 약 실험이 성공했대요!" 이 뉴스는 약 만드는 회사에…', options:[
+        {t:'호재', ok:true, why:'맞아! 약을 팔아 돈을 벌 것 같으니 좋은 소식이야.'},
+        {t:'악재', ok:false, why:'실험이 성공했으니 회사에는 좋은 소식이야.'},
+      ]},
+      {q:'금리가 올랐다는 뉴스가 나오면 주가는 보통?', options:[
+        {t:'내리기 쉬워', ok:true, why:'맞아! 은행 이자가 늘면 주식을 팔고 은행에 맡기려는 사람이 늘어.'},
+        {t:'오르기 쉬워', ok:false, why:'반대야. 은행 이자가 늘면 주식에서 돈이 빠져나가기 쉬워.'},
+      ]},
     ]},
-    remember:['사려는 사람이 많으면 주가가 올라요.','내일 주가는 아무도 정확히 몰라요.'] },
+    remember:['사려는 사람이 많으면 주가가 올라요.','좋은 소식은 호재, 나쁜 소식은 악재예요.','내일 주가는 아무도 정확히 몰라요.'] },
 
   { title:'ETF는 무엇일까?', sub:'주식을 담은 바구니', unlock:'시장에 ETF가 열렸어요!',
     talk:[
@@ -572,6 +588,17 @@ const NEWS = {
   '에너지·소재':['공장들이 철과 기름을 많이 쓴대요!','철과 기름이 덜 팔린대요.'],
   '유통':['마트와 편의점에 손님이 늘었대요!','마트 손님이 줄었대요.'],
 };
+// 나라·세계 소식: 10일 동안 매일 주식 시장 전체(st)와 채권 값(gov·corp)에 더해진다
+const MACRO = [
+  { good:false, head:'💰 금리', t:'은행 금리가 올랐대요!', st:-0.004, gov:-0.003, corp:-0.003,
+    why:'은행에 맡기면 이자를 더 받으니 주식을 팔려는 사람이 늘어요. 이자를 덜 주는 옛날 채권도 인기가 떨어져요.' },
+  { good:true, head:'💰 금리', t:'은행 금리가 내렸대요!', st:0.004, gov:0.003, corp:0.003,
+    why:'은행 이자가 줄어 주식으로 돈이 몰려요. 이자를 더 주는 옛날 채권도 인기가 올라요.' },
+  { good:false, head:'🌏 세계 경제', t:'세계 경제가 어려워져서 물건이 덜 팔린대요.', st:-0.005, gov:0.002, corp:-0.003,
+    why:'회사들이 돈을 덜 벌 것 같아 주식과 회사채 값이 내려요. 대신 안전한 국채를 찾는 사람이 늘어요.' },
+  { good:true, head:'🌏 세계 경제', t:'세계 경제가 좋아져서 물건이 잘 팔린대요!', st:0.004, gov:-0.001, corp:0.002,
+    why:'회사들이 돈을 더 벌 것 같아 주식과 회사채 값이 올라요. 안전한 국채는 인기가 조금 줄어요.' },
+];
 const SHOP = [
   ['ice','🍦','아이스크림',5,2],['comic','📚','만화책',15,5],['ball','⚽','축구공',30,10],['doll','🧸','곰 인형',40,12],
   ['shoes','👟','운동화',80,20],['lego','🧱','블록 장난감',120,30],['bike','🚲','자전거',300,60],['game','🎮','게임기',450,70],
@@ -607,8 +634,8 @@ function houseGauge(ratio, size){
     <path class="edge" d="${shape}"/><rect class="edge" x="27" y="44" width="10" height="17" rx="2"/></svg>`;
 }
 const BONDS = {
-  gov:{ name:'나라 채권(국채)', rate:0.004, risk:0, why:'나라에 빌려줘요. 매달 이자 0.4%(게임용), 아주 안전해요.' },
-  corp:{ name:'회사 채권(회사채)', rate:0.007, risk:0.002, why:'회사에 빌려줘요. 매달 이자 0.7%(게임용), 대신 아주 가끔 못 돌려받을 수 있어요.' },
+  gov:{ name:'나라 채권(국채)', rate:0.004, risk:0, vol:0.001, why:'나라에 빌려줘요. 매달 이자 0.4%(게임용), 아주 안전해요.' },
+  corp:{ name:'회사 채권(회사채)', rate:0.007, risk:0.002, vol:0.002, why:'회사에 빌려줘요. 매달 이자 0.7%(게임용), 대신 아주 가끔 못 돌려받을 수 있어요.' },
 };
 // 3분 = 한 달(하루 6초), 120달 = 10년 = 놀이 시간 약 6시간
 const G0 = { START:1000, SALARY:200, MONTHS:120, DAYS:30, TICK:6000, BANK:0.003, UNIT:100, BOND_M:12, REST:3600,
@@ -634,6 +661,7 @@ const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } ca
 let done = load(K.done, []);
 let G = load(K.game, null);
 if (G && G.en === undefined) G.en = 100;  // 기운이 생기기 전에 저장된 게임
+if (G && !G.bp){ G.bp = { gov:100, corp:100 }; G.mboost = []; }  // 채권 값이 생기기 전에 저장된 게임
 let homes = load(K.homes, []);
 let best = load(K.best, 0);
 const has = f => done.length > FEAT[f];
@@ -654,7 +682,7 @@ let S = { view:'home', tab:'wallet', filter:'전체', qty:1, paused:true };
 function newGame(){
   const p = {}, h = {};
   CO.forEach(c => { p[c.id] = c.p * (0.9 + Math.random() * 0.2); });
-  G = { month:1, day:0, cash:G0.START, bank:0, rate:30, hold:{}, bonds:[], bag:[], en:100, p, p0:{...p}, pm:{}, h, boost:[], news:null, realized:0, modal:{type:'pay', first:true, rate:30}, over:null, log:[] };
+  G = { month:1, day:0, cash:G0.START, bank:0, rate:30, hold:{}, bonds:[], bag:[], en:100, p, p0:{...p}, pm:{}, h, boost:[], news:null, bp:{ gov:100, corp:100 }, mboost:[], mnews:null, realized:0, modal:{type:'pay', first:true, rate:30}, over:null, log:[] };
   etfPrices(); ALL.forEach(x => { G.h[x.id] = [G.p[x.id]]; G.pm[x.id] = G.p[x.id]; });
   S.paused = false; saveG();
 }
@@ -664,12 +692,18 @@ function etfPrices(){
 function saveG(){ store(K.game, G); }
 function worth(){
   const inv = Object.entries(G.hold).reduce((s, [id, x]) => s + x.q * G.p[id], 0);
-  const bonds = G.bonds.reduce((s, b) => s + b.amt, 0);
+  const bonds = G.bonds.reduce((s, b) => s + bondVal(b), 0);
   const house = curPrice();
   return { cash:G.cash, bank:G.bank, inv, bonds, house, money:G.cash + G.bank + inv + bonds, total:G.cash + G.bank + inv + bonds + house };
 }
+// 채권 값 = 원금 100코인짜리 한 장의 지금 값. 소식에 출렁이다가 조금씩 100으로 돌아온다(만기엔 원금)
+const bondVal = b => b.amt * G.bp[b.kind] / 100;
 function step(){
-  const m = gauss() * 0.01 + 0.0002;
+  const mb = { st:0, gov:0, corp:0 };
+  G.mboost.forEach(b => { mb.st += b.st; mb.gov += b.gov; mb.corp += b.corp; b.left--; });
+  G.mboost = G.mboost.filter(b => b.left > 0);
+  Object.keys(BONDS).forEach(k => { const v = G.bp[k]; G.bp[k] = v * Math.exp(mb[k] + gauss() * BONDS[k].vol) + (100 - v) * 0.02; });
+  const m = gauss() * 0.01 + 0.0002 + mb.st;
   const sec = {};
   Object.keys(SECTORS).forEach(s => { sec[s] = gauss() * 0.008; });
   G.boost.forEach(b => { sec[b.sec] += b.v; b.left--; });
@@ -682,6 +716,11 @@ function step(){
     const keys = Object.keys(SECTORS), s = keys[Math.floor(Math.random() * keys.length)], good = Math.random() < 0.55;
     G.boost.push({ sec:s, v:good ? 0.006 : -0.006, left:10 });
     G.news = { sec:s, good, t:NEWS[s][good ? 0 : 1], m:G.month };
+  }
+  if (G.day === 20 && Math.random() < 0.35){
+    const i = Math.floor(Math.random() * MACRO.length), x = MACRO[i];
+    G.mboost.push({ st:x.st, gov:x.gov, corp:x.corp, left:10 });
+    G.mnews = { i, m:G.month };
   }
   if (G.day >= G0.DAYS) monthEnd();
 }
@@ -816,11 +855,15 @@ function gameView(){
     ${has('shop') ? `<div class="row between small" style="margin-top:2px"><span>⚡ 기운 <b>${G.en}</b></span><span>${G.en < G0.TIRED ? '지쳤어요! 월급이 줄었어요. 상점에서 기운을 채워요' : G.en < 50 ? '조금 지쳐 가요. 가끔은 쉬어 가요' : '힘이 넘쳐요'}</span></div>
     <div class="mbar en"><i style="width:${G.en}%"></i></div>` : ''}
     <div class="goalrow">${houseGauge(w.money / houseCost(goal), 46)}<p class="small"><b>목표: ${goal.name}</b> (${fmt(goal.price)}코인${G.house ? `, 지금 집 팔고 ${fmt(houseCost(goal))} 보태기` : ''})<br>모은 돈으로 ${Math.min(100, Math.floor(w.money / houseCost(goal) * 100))}% 쌓았어요</p></div>
-    ${G.news && G.news.m === G.month ? `<div class="news">📰 <b>${SECTORS[G.news.sec]} ${G.news.sec}</b> 소식: ${G.news.t} <span class="small">(게임 속 가짜 뉴스)</span></div>` : ''}
+    ${G.news && G.news.m === G.month ? newsBox(G.news.good, `${SECTORS[G.news.sec]} ${G.news.sec}`, G.news.t) : ''}
+    ${has('bond') && G.mnews && G.mnews.m === G.month ? macroBox(MACRO[G.mnews.i]) : ''}
   </div>`;
   const tab = { market:marketTab, wallet:walletTab, shop:shopTab, bag:bagTab }[S.tab]();
   return T(gbar) + tab;
 }
+const newsBox = (good, head, t, more = '') => `<div class="news"><span class="tag ${good ? 'up' : 'down'}">${good ? '[[호재]]' : '[[악재]]'}</span>📰 <b>${head}</b> 소식: ${t} <span class="small">(게임 속 가짜 뉴스)</span>${more}</div>`;
+const arrow = (name, v) => `<span class="${v > 0 ? 'up' : 'down'}">${name} ${v > 0 ? '▲' : '▼'}</span>`;
+const macroBox = x => newsBox(x.good, x.head, x.t, `<br><span class="small">${x.why}<br>${has('stock') ? arrow('주식', x.st) + ' · ' : ''}${arrow('국채', x.gov)} · ${arrow('회사채', x.corp)}</span>`);
 function lockView(f){
   const u = unl(f), k = FEAT[f] + 1;
   return stage('think', `${u.ic} <b>${u.name}</b>${u.j === '이' ? '은' : '는'} 아직 잠겨 있어. <b>${k}번 코스</b>까지 들으면 열려! (지금 ${done.length}개 들었어)`) +
@@ -860,9 +903,10 @@ function walletTab(){
     const v = x.q * G.p[id], r = v / x.cost - 1;
     return `<button class="stock" data-a="co" data-id="${id}"><b>${byId(id).name}</b><span class="pr">${fmt(v)}</span><small>${x.q}주 · 산 값 ${fmt(x.cost)}</small><span class="ch ${ud(r)}">${pct(r)}</span></button>`;
   }).join('');
-  const bonds = has('bond') ? `<div class="panel"><h2>📜 [[채권]]</h2><p class="small" style="margin:0">하나에 ${G0.UNIT}코인. ${G0.BOND_M}달 뒤 [[만기]]에 돌려받고, 그동안 매달 이자를 받아요.</p>
-    ${Object.entries(BONDS).map(([k, b]) => `<div class="row between"><span><b>${b.name}</b><br><span class="small">${b.why}</span></span><button class="btn sm" data-a="bond" data-k="${k}" ${G.cash < G0.UNIT ? 'disabled' : ''}>사기</button></div>`).join('')}
-    ${G.bonds.length ? G.bonds.map(b => `<div class="kv"><span>${BONDS[b.kind].name}</span><b>${fmt(b.amt)} · ${b.left}달 남음</b></div>`).join('') : ''}</div>` : '';
+  const bonds = has('bond') ? `<div class="panel"><h2>📜 [[채권]]</h2><p class="small" style="margin:0">한 장에 [[원금]] ${G0.UNIT}코인. 값은 [[금리]]·경제 소식에 따라 오르내려요. ${G0.BOND_M}달 뒤 [[만기]]에 원금을 돌려받고, 그동안 매달 이자를 받아요. 만기 전에 팔면 그때 값으로 받아요.</p>
+    ${Object.entries(BONDS).map(([k, b]) => { const c = G0.UNIT * G.bp[k] / 100;
+      return `<div class="row between"><span><b>${b.name}</b> <span class="${ud(G.bp[k] / 100 - 1)}">지금 값 ${c.toFixed(1)}</span><br><span class="small">${b.why}</span></span><button class="btn sm" data-a="bond" data-k="${k}" ${G.cash < c ? 'disabled' : ''}>사기</button></div>`; }).join('')}
+    ${G.bonds.map((b, i) => `<div class="kv"><span>${BONDS[b.kind].name} · ${b.left}달 남음</span><b>${bondVal(b).toFixed(1)} <button class="btn sm ghost" data-a="bondsell" data-i="${i}">팔기</button></b></div>`).join('')}</div>` : '';
   const house = `<div class="panel"><h2>🏡 내 집 사기</h2><p class="small" style="margin:0">${has('house') ? '현금으로 사요. 저금통장이나 투자한 돈은 먼저 현금으로 바꿔야 해요. 더 큰 집으로 이사할 땐 지금 집을 팔고 모자란 돈만 보태요. 집을 사면 [[월세]] 대신 [[관리비]]만 내요.' : '🔒 9번 코스를 들으면 살 수 있어요. 그때까지 벽돌을 차곡차곡 쌓아 둬!'}</p>
     ${HOUSES.map(h => { const own = G.house === h.id, up = h.price > curPrice(), c = houseCost(h);
       const st = own ? '지금 사는 집!' : !up ? '지금 집보다 작아요' : (G.house ? `지금 집 팔고 ${fmt(c)} 보태기 · ` : '') + Math.min(100, Math.floor(w.money / c * 100)) + '%';
@@ -1048,7 +1092,8 @@ const ACTIONS = {
   },
   dep(b){ const v = b.dataset.v === 'all' ? G.cash : Math.min(+b.dataset.v, G.cash); G.cash -= v; G.bank += v; saveG(); },
   wd(b){ const v = b.dataset.v === 'all' ? G.bank : Math.min(+b.dataset.v, G.bank); G.bank -= v; G.cash += v; saveG(); },
-  bond(b){ if (G.cash < G0.UNIT) return; G.cash -= G0.UNIT; G.bonds.push({ kind:b.dataset.k, amt:G0.UNIT, left:G0.BOND_M }); saveG(); },
+  bond(b){ const k = b.dataset.k, c = G0.UNIT * G.bp[k] / 100; if (G.cash < c) return; G.cash -= c; G.bonds.push({ kind:k, amt:G0.UNIT, left:G0.BOND_M }); saveG(); },
+  bondsell(b){ const x = G.bonds[+b.dataset.i]; if (!x) return; G.cash += bondVal(x); G.bonds.splice(+b.dataset.i, 1); saveG(); },
   buyitem(b){ const s = SHOP.find(x => x.id === b.dataset.id); if (G.cash < s.price) return; G.cash -= s.price; G.en = Math.min(100, (G.en ?? 100) + s.en); G.bag.push({ id:s.id, m:Math.min(G.month, G0.MONTHS) }); saveG(); },
   house(b){
     const h = HOUSES.find(x => x.id === b.dataset.id), c = houseCost(h); if (c <= 0 || G.cash < c) return;
