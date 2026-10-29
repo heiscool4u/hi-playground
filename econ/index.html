@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>콩콩이 경제교실</title>
+<meta name="description" content="로봇 콩콩이와 돈·저축·주식·ETF·채권을 배우고 투자 게임으로 내 집 마련까지 해 보는 어린이 경제교실">
+<meta property="og:title" content="콩콩이 경제교실 · 하이놀이터">
+<meta property="og:description" content="월급 받고, 저금하고, 주식도 사 보고, 내 집까지! 어린이 경제 게임">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: 하이놀이터와 같은 놀이 공책. 배우기 = 코스 10개 징검다리, 게임 = 위 상태줄 + 가운데 한 칸 + 아래 탭 */
+:root{
+  --bg:#EAF4EE; --surface:#FFFFFF; --ink:#21323A; --muted:#5A6E76; --line:#CADBD1;
+  --coral:#FF6B4A; --coral-deep:#D9502F; --coral-ink:#FFFFFF;
+  --sun:#FFC63A; --sun-soft:#FFF1C7; --sun-ink:#4A3600;
+  --leaf:#23955F; --leaf-soft:#D9F3E4; --bad:#D93D52; --bad-soft:#FDE1E4;
+  --sky:#3A8DD6; --sky-ink:#FFFFFF;
+  --up:#D6334A; --down:#2766C9;
+  --bot:#9FD9C6; --bot-edge:#6DBBA3; --bot-face:#22343D; --bot-eye:#8DF2CF; --cheek:#FF9A88;
+  --display:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --text:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#13201F; --surface:#1D2E2D; --ink:#E8F3EF; --muted:#9BB3AE; --line:#34504C;
+  --coral:#FF8466; --coral-deep:#C9573B; --coral-ink:#2A0E06;
+  --sun:#F6C64A; --sun-soft:#3A3218; --sun-ink:#FFE9A8;
+  --leaf:#4BC98B; --leaf-soft:#173A2A; --bad:#FF6F82; --bad-soft:#40202A;
+  --sky:#6AB4F0; --sky-ink:#0B1D2C;
+  --up:#FF6B7D; --down:#6EA8FF;
+  --bot:#7FC9B2; --bot-edge:#57A48C; --bot-face:#0F1C22; --bot-eye:#8DF2CF; --cheek:#E9806F;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#13201F; --surface:#1D2E2D; --ink:#E8F3EF; --muted:#9BB3AE; --line:#34504C;
+  --coral:#FF8466; --coral-deep:#C9573B; --coral-ink:#2A0E06;
+  --sun:#F6C64A; --sun-soft:#3A3218; --sun-ink:#FFE9A8;
+  --leaf:#4BC98B; --leaf-soft:#173A2A; --bad:#FF6F82; --bad-soft:#40202A;
+  --sky:#6AB4F0; --sky-ink:#0B1D2C;
+  --up:#FF6B7D; --down:#6EA8FF;
+  --bot:#7FC9B2; --bot-edge:#57A48C; --bot-face:#0F1C22; --bot-eye:#8DF2CF; --cheek:#E9806F;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.65}
+.wrap{max-width:640px;margin:0 auto;padding:14px max(16px,env(safe-area-inset-right,0px)) calc(110px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+h1,h2,h3,.disp{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+.small{font-size:14px;color:var(--muted)}
+.up{color:var(--up)} .down{color:var(--down)}
+
+/* 머리줄 */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.brand{font-family:var(--display);font-size:23px;line-height:1.2;text-decoration:none;color:inherit}
+.brand small{display:block;font-family:var(--text);font-size:13px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--sun-soft);color:var(--sun-ink);border-radius:999px;padding:5px 13px;font-family:var(--display);font-size:17px;white-space:nowrap}
+
+/* 콩콩이 */
+.stage{display:grid;grid-template-columns:92px minmax(0,1fr);gap:10px;align-items:end;margin-bottom:6px}
+.bot{width:92px;height:auto;animation:bob 2.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.bubble{position:relative;background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:13px 17px;font-size:18px;margin-bottom:20px;min-width:0}
+.bubble::after{content:"";position:absolute;left:-11px;bottom:22px;width:18px;height:18px;background:var(--surface);border-left:2px solid var(--line);border-bottom:2px solid var(--line);transform:rotate(45deg)}
+.b-body{fill:var(--bot);stroke:var(--bot-edge);stroke-width:3}
+.b-face{fill:var(--bot-face)} .b-eye{fill:var(--bot-eye)}
+.b-line{fill:none;stroke:var(--bot-eye);stroke-width:3.5;stroke-linecap:round}
+.b-cheek{fill:var(--cheek);opacity:.75} .b-ant{stroke:var(--bot-edge);stroke-width:3} .b-light{fill:var(--sun)}
+
+/* 낱말 버튼 */
+.term{border:0;background:none;padding:0 1px;color:inherit;font:inherit;font-weight:700;text-decoration:underline dotted var(--coral) 2px;text-underline-offset:4px;cursor:pointer}
+
+/* 공용 */
+.panel{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.panel h2{font-size:21px}
+.q{font-family:var(--display);font-size:20px;line-height:1.45;margin:0}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.row.end{justify-content:flex-end}
+.row.between{justify-content:space-between}
+.btn{font-family:var(--display);font-size:18px;padding:10px 20px;border-radius:999px;border:0;background:var(--coral);color:var(--coral-ink);cursor:pointer;box-shadow:0 4px 0 var(--coral-deep)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--coral-deep)}
+.btn.ghost{background:transparent;color:var(--muted);box-shadow:none;border:2px solid var(--line)}
+.btn.sky{background:var(--sky);color:var(--sky-ink);box-shadow:0 4px 0 var(--line)}
+.btn.sm{font-size:16px;padding:7px 14px}
+.btn[disabled]{opacity:.4;cursor:default;transform:none}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:block;width:100%;text-align:left;padding:12px 15px;border:2px solid var(--line);border-radius:16px;background:var(--bg);cursor:pointer;font-size:17px}
+.opt.right{border-color:var(--leaf);background:var(--leaf-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.ox{display:flex;gap:18px;justify-content:center}
+.oxb{width:88px;height:88px;border-radius:50%;border:3px solid var(--line);background:var(--bg);font-family:var(--display);font-size:42px;cursor:pointer}
+.oxb.o{color:var(--sky)} .oxb.x{color:var(--bad)}
+.oxb.right{background:var(--leaf-soft);border-color:var(--leaf)} .oxb.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.memo{background:var(--sun-soft);color:var(--sun-ink);border-radius:20px;padding:16px 18px}
+.memo h3{font-size:18px;margin-bottom:4px}
+.memo ul{margin:0;padding-left:20px;font-family:var(--display);font-size:19px;line-height:1.55}
+.unlock{background:var(--leaf-soft);border:2px solid var(--leaf);border-radius:16px;padding:10px 14px;font-family:var(--display)}
+
+/* 수업 */
+.lhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.back{background:none;border:0;cursor:pointer;font-family:var(--display);font-size:18px;color:var(--muted);padding:6px 0}
+.ltitle{font-size:25px;margin:2px 0 14px}
+.ltitle em{font-style:normal;color:var(--coral-deep);margin-right:6px}
+.dots{display:flex;gap:6px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--coral)}
+
+/* 배우기 지도 */
+.course{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:10px 14px;cursor:pointer}
+.course .n{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:20px;background:var(--bg);border:2px solid var(--line)}
+.course.done .n{background:var(--leaf);border-color:var(--leaf);color:#fff}
+.course.next{border-color:var(--coral);box-shadow:0 3px 0 var(--coral-deep)}
+.course.next .n{background:var(--coral);border-color:var(--coral);color:var(--coral-ink)}
+.course[disabled]{opacity:.5;cursor:default}
+.course b{font-family:var(--display);font-weight:400;font-size:19px;display:block;line-height:1.3}
+.course small{color:var(--muted);font-size:14px}
+.course .tag{font-size:13px;color:var(--leaf);white-space:nowrap}
+.list{display:flex;flex-direction:column;gap:10px}
+.door{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--sun-soft);color:var(--sun-ink);border:0;border-radius:22px;padding:16px 18px;cursor:pointer;box-shadow:0 4px 0 var(--sun)}
+.door .ic{font-size:38px;line-height:1}
+.door b{font-family:var(--display);font-weight:400;font-size:22px;display:block}
+.door[disabled]{opacity:.55;cursor:default}
+.cert{border:3px double var(--sun-ink);background:var(--sun-soft);color:var(--sun-ink);border-radius:20px;padding:22px;text-align:center}
+.cert h2{font-size:26px}
+.sec{margin:22px 0 10px;font-size:20px}
+
+/* 아래 메뉴 */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;gap:4px;background:var(--surface);border-top:2px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+.nav button,.nav a{flex:1;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:0;background:none;border:0;border-radius:14px;padding:5px 2px;cursor:pointer;font-family:var(--display);font-size:15px;color:var(--muted);text-decoration:none}
+.nav .ic{font-size:22px;line-height:1.2}
+.nav .on{background:var(--sun-soft);color:var(--sun-ink)}
+.nav [aria-disabled="true"]{opacity:.45}
+
+/* 게임 상태줄 */
+.gbar{position:sticky;top:0;z-index:10;background:var(--bg);padding:8px 0 10px;margin:-14px 0 10px}
+.gbar .row{gap:8px}
+.gbar .when{font-family:var(--display);font-size:20px}
+.mbar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.mbar i{display:block;height:100%;background:var(--coral)}
+.mbar.goal i{background:var(--leaf)}
+.icon{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;cursor:pointer;font-family:var(--display);font-size:16px;white-space:nowrap}
+.money{display:flex;gap:6px;flex-wrap:wrap}
+.news{background:var(--surface);border:2px dashed var(--sun);border-radius:14px;padding:8px 12px;font-size:15px;margin-top:8px}
+
+/* 시장 */
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chip{flex:none;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;cursor:pointer;font-size:15px;white-space:nowrap}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.stock{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;width:100%;text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:9px 14px;cursor:pointer}
+.stock b{font-family:var(--display);font-weight:400;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stock .pr{font-family:var(--display);font-size:18px;text-align:right}
+.stock small{color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stock .ch{font-size:14px;text-align:right}
+.stock.mine{border-color:var(--sky)}
+.grp{font-family:var(--display);font-size:17px;color:var(--muted);margin:10px 4px 2px}
+
+/* 지갑·상점 */
+.kv{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px dashed var(--line)}
+.kv:last-child{border-bottom:0}
+.kv b{font-family:var(--display);font-weight:400}
+.total{font-family:var(--display);font-size:28px}
+.shop{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.item{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:12px;text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.item .em{font-size:38px;line-height:1.1}
+.item b{font-family:var(--display);font-weight:400;font-size:17px}
+.bag{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.bag div{background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:8px 4px;text-align:center;font-size:13px}
+.bag .em{font-size:30px;display:block}
+.house{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:10px;align-items:center}
+.house .em{font-size:40px}
+.hg{display:block;flex:none}
+.hg .wall{fill:var(--bg);stroke:var(--line)}
+.hg .brick{fill:var(--leaf)} .hg .brick.part{opacity:.45}
+.hg .roof.full{fill:var(--coral)}
+.hg .seam{stroke:var(--surface);stroke-width:1.2}
+.hg .edge{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linejoin:round}
+.hg.done .edge{stroke:var(--coral-deep)}
+.goalrow{display:flex;align-items:center;gap:10px;margin-top:6px}
+.goalrow p{margin:0}
+.goalbig{display:flex;align-items:center;gap:16px}
+
+/* 창(시트) */
+.scrim{position:fixed;inset:0;z-index:30;background:rgba(10,20,20,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:640px;max-height:88vh;overflow:auto;background:var(--surface);border-radius:24px 24px 0 0;padding:18px max(18px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px}
+.sheet h2{font-size:24px}
+.sheet .x{margin-left:auto}
+.spark{width:100%;height:90px;display:block}
+.spark .ln{fill:none;stroke-width:2.5}
+.step{display:flex;align-items:center;gap:8px}
+.step button{width:40px;height:40px;border-radius:50%;border:2px solid var(--line);background:var(--bg);font-family:var(--display);font-size:22px;cursor:pointer}
+.step output{min-width:44px;text-align:center;font-family:var(--display);font-size:22px}
+.rates{display:flex;flex-wrap:wrap;gap:8px}
+.fake{font-size:13px;color:var(--muted);text-align:center}
+
+@media (max-width:440px){
+  .bubble{font-size:17px;padding:12px 14px}
+  .stage{grid-template-columns:76px minmax(0,1fr)} .bot{width:76px}
+  .ltitle{font-size:23px}
+}
+@media (prefers-reduced-motion:reduce){.bot{animation:none}}
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<div id="layer"></div>
+<script>
+/* ---------- 콩콩이 ---------- */
+function bot(mood){
+  const faces = {
+    happy:'<circle class="b-eye" cx="47" cy="58" r="6"/><circle class="b-eye" cx="73" cy="58" r="6"/><path class="b-line" d="M51 70 Q60 78 69 70"/>',
+    cheer:'<path class="b-line" d="M40 61 Q47 51 54 61"/><path class="b-line" d="M66 61 Q73 51 80 61"/><path class="b-eye" d="M49 68 Q60 82 71 68 Z"/>',
+    think:'<circle class="b-eye" cx="51" cy="55" r="5"/><circle class="b-eye" cx="76" cy="55" r="5"/><path class="b-line" d="M53 73 L67 70"/>',
+    wow:'<circle class="b-eye" cx="46" cy="57" r="8"/><circle class="b-eye" cx="74" cy="57" r="8"/><circle class="b-face" cx="48" cy="55" r="2.5"/><circle class="b-face" cx="76" cy="55" r="2.5"/><circle class="b-eye" cx="60" cy="75" r="5"/>',
+    worry:'<path class="b-line" d="M39 49 L52 53"/><path class="b-line" d="M81 49 L68 53"/><circle class="b-eye" cx="47" cy="60" r="5"/><circle class="b-eye" cx="73" cy="60" r="5"/><path class="b-line" d="M49 75 Q54 70 60 75 Q66 80 71 75"/>',
+  };
+  return `<svg class="bot" viewBox="0 0 120 132" role="img" aria-label="로봇 콩콩이">
+    <line class="b-ant" x1="60" y1="24" x2="60" y2="10"/><circle class="b-light" cx="60" cy="8" r="6"/>
+    <ellipse class="b-body" cx="12" cy="76" rx="8" ry="13"/><ellipse class="b-body" cx="108" cy="76" rx="8" ry="13"/>
+    <rect class="b-body" x="38" y="108" width="16" height="16" rx="8"/><rect class="b-body" x="66" y="108" width="16" height="16" rx="8"/>
+    <rect class="b-body" x="16" y="24" width="88" height="90" rx="40"/>
+    <rect class="b-face" x="27" y="38" width="66" height="48" rx="20"/>
+    ${faces[mood] || faces.happy}
+    <circle class="b-cheek" cx="32" cy="96" r="6"/><circle class="b-cheek" cx="88" cy="96" r="6"/>
+  </svg>`;
+}
+const stage = (mood, say) => `<div class="stage">${bot(mood)}<div class="bubble" aria-live="polite">${T(say)}</div></div>`;
+
+/* ---------- 낱말 사전: 글 속 [[낱말]]은 누르면 설명이 뜬다 ---------- */
+const GLOSS = {
+  '돈':'물건이나 일과 바꿀 수 있도록 모두가 약속한 것이에요. 동전, 지폐, 카드 속 숫자도 다 돈이에요.',
+  '물물교환':'돈 없이 물건과 물건을 직접 바꾸는 것. 쌀을 주고 신발을 받는 식이에요.',
+  '월급':'회사에서 일한 대가로 한 달마다 받는 돈이에요.',
+  '소비':'돈을 써서 물건을 사거나 서비스를 받는 것이에요.',
+  '저축':'돈을 쓰지 않고 모아 두는 것이에요. 은행 통장에 넣어 두면 이자도 받아요.',
+  '이자':'돈을 맡기거나 빌려준 대가로 더 받는 돈이에요. 빌린 사람은 이자를 내야 해요.',
+  '원금':'처음에 맡기거나 빌려준 돈 그 자체. 이자는 원금에 더해 붙는 돈이에요.',
+  '복리':'이자에도 다시 이자가 붙는 방법이에요. 오래 둘수록 돈이 더 빨리 불어나요.',
+  '예금':'은행에 돈을 맡기는 것, 또는 맡긴 돈이에요.',
+  '예산':'돈을 어디에 얼마나 쓸지 미리 정해 두는 계획이에요.',
+  '채권':'돈을 빌려줬다는 약속 증서예요. 정해진 이자를 받다가 만기에 빌려준 돈을 돌려받아요.',
+  '국채':'나라가 돈을 빌리면서 내주는 채권이에요. 아주 안전한 편이에요.',
+  '회사채':'회사가 돈을 빌리면서 내주는 채권이에요. 국채보다 이자를 더 주는 대신 위험도 더 커요.',
+  '만기':'빌려준 돈을 돌려받기로 약속한 날이에요.',
+  '위험':'돈을 잃을 수도 있는 정도예요. 많이 벌 수 있는 곳일수록 보통 위험도 커요.',
+  '투자':'돈이 불어나기를 바라며 주식·채권 같은 곳에 돈을 넣는 것이에요. 잃을 수도 있어요.',
+  '주식':'회사를 아주 잘게 나눈 조각이에요. 주식을 사면 그 회사의 작은 주인이 돼요.',
+  '주주':'주식을 가진 사람. 회사의 작은 주인이에요.',
+  '주가':'주식 한 주의 가격이에요. 사려는 사람과 팔려는 사람에 따라 매일 바뀌어요.',
+  '배당':'회사가 번 돈의 일부를 주주에게 나눠 주는 것이에요. 주지 않는 회사도 있어요.',
+  '증권 시장':'주식과 채권을 사고파는 시장이에요. 우리나라에는 코스피·코스닥 시장이 있어요.',
+  '시가총액':'회사 주식을 모두 합친 값(주가 × 주식 수)이에요. 회사가 얼마나 큰지 볼 때 써요.',
+  '수익':'산 값보다 비싸게 팔거나 이자를 받아서 늘어난 돈이에요.',
+  '손해':'산 값보다 싸게 팔아서 줄어든 돈이에요.',
+  '수익률':'처음 돈보다 얼마나 늘었는지(줄었는지)를 %로 나타낸 것이에요. 100이 110이 되면 +10%예요.',
+  'ETF':'여러 회사 주식을 한 바구니에 담아서, 주식처럼 한 번에 사고팔 수 있게 만든 상품이에요.',
+  '분산투자':'돈을 한곳에 몰지 않고 여러 곳에 나눠 넣는 것이에요. "달걀을 한 바구니에 담지 마라"와 같은 뜻이에요.',
+  '목돈':'조금씩 모아서 한꺼번에 쓸 수 있게 된 큰돈이에요.',
+  '대출':'은행 같은 곳에서 돈을 빌리는 것이에요. 빌린 돈에 이자를 붙여 갚아야 해요.',
+  '재산':'내가 가진 돈과 물건을 모두 합친 것이에요. 게임에서는 현금·통장·채권·주식에 산 집까지 합쳐요.',
+};
+const T = s => String(s).replace(/\[\[([^\]]+)\]\]/g, (_, w) => GLOSS[w] ? `<button class="term" data-a="term" data-t="${w}">${w}</button>` : w);
+
+/* ---------- 코스 10개: 다 들으면 인증서, 코스마다 게임 기능이 하나씩 열린다 ---------- */
+const COURSES = [
+  { title:'돈은 왜 생겼을까?', sub:'돈과 월급 알아보기',
+    talk:[
+      ['cheer','안녕! 콩콩이 <b>경제교실</b>에 온 걸 환영해. 오늘은 [[돈]] 이야기를 해 볼 거야.'],
+      ['think','아주 옛날엔 돈이 없었어. 그래서 쌀을 주고 신발을 받는 식으로 물건끼리 바꿨지. 이걸 [[물물교환]]이라고 해.'],
+      ['wow','그런데 신발 가게 아저씨가 쌀이 필요 없다면? 바꿀 수가 없잖아! 그래서 누구나 받아 주는 <b>돈</b>을 쓰기로 약속했어.'],
+      ['happy','어른들은 일을 하고 그 대가로 돈을 받아. 회사에서 한 달마다 받는 돈을 [[월급]]이라고 해.'],
+      ['cheer','돈으로 물건을 사는 건 [[소비]]라고 해. 받은 돈을 어디에 쓸지는 내가 정하는 거야!'],
+    ],
+    act:{type:'ox', items:[
+      {q:'돈이 없던 옛날에는 물건끼리 바꿨다.', a:true, why:'맞아! 그걸 물물교환이라고 해.'},
+      {q:'월급은 일한 대가로 받는 돈이다.', a:true, why:'맞아! 어른들은 일을 해서 월급을 받아.'},
+      {q:'돈은 쓰고 싶은 만큼 저절로 계속 생긴다.', a:false, why:'아니야. 돈은 일을 해서 벌어야 하고, 쓰면 줄어들어.'},
+    ]},
+    remember:['돈은 물건과 바꿀 수 있는 약속이에요.','어른들은 일을 해서 월급을 받아요.'] },
+
+  { title:'저축과 이자', sub:'모으면 불어나요', unlock:'게임 문이 열렸어요! 월급날마다 저금할 만큼을 정해요.',
+    talk:[
+      ['think','월급을 받자마자 다 써 버리면? 갑자기 돈이 필요할 때 곤란해져.'],
+      ['happy','그래서 월급의 일부를 떼어 모아 둬. 이걸 [[저축]]이라고 해.'],
+      ['wow','은행에 돈을 맡기면 은행이 돈을 조금 더 얹어 줘. 그게 [[이자]]야!'],
+      ['think','은행은 맡은 돈을 필요한 사람에게 빌려주고 이자를 받아. 그 덕분에 맡긴 사람에게도 이자를 줄 수 있어.'],
+      ['cheer','이자에 또 이자가 붙는 걸 [[복리]]라고 해. 일찍, 오래 모을수록 돈이 더 빨리 불어나!'],
+      ['happy','게임에서는 저금통장 이자를 한 달에 0.3%로 줬어. 진짜 은행 이자는 보통 이보다 조금 적어. 이제 <b>게임 문</b>이 열려!'],
+    ],
+    act:{type:'choose', items:[
+      {q:'월급 200코인 가운데 20%를 저금하면 얼마일까?', options:[
+        {t:'20코인', ok:false, why:'20%는 20코인이 아니야. 100에서 20이니까 200에서는 그 두 배!'},
+        {t:'40코인', ok:true, why:'정답! 200의 20%는 40이야.'},
+        {t:'100코인', ok:false, why:'100코인은 절반, 50%야.'},
+      ]},
+      {q:'은행이 이자를 줄 수 있는 까닭은?', options:[
+        {t:'맡은 돈을 빌려주고 이자를 받기 때문에', ok:true, why:'맞아! 빌려준 사람에게 받은 이자의 일부를 맡긴 사람에게 줘.'},
+        {t:'은행 금고에서 돈이 저절로 생겨서', ok:false, why:'돈이 저절로 생기진 않아. 빌려주고 이자를 받아서야.'},
+      ]},
+    ]},
+    remember:['월급을 받으면 먼저 조금 떼어 저축해요.','오래 모을수록 이자에 이자가 붙어요.'] },
+
+  { title:'필요한 것, 갖고 싶은 것', sub:'예산 세우기', unlock:'게임에 상점과 가방이 열렸어요!',
+    talk:[
+      ['think','갖고 싶은 건 끝이 없는데, 돈은 정해져 있어. 어떡하지?'],
+      ['happy','꼭 있어야 하는 건 <b>필요한 것</b>, 없어도 되지만 있으면 좋은 건 <b>갖고 싶은 것</b>이야.'],
+      ['cheer','돈을 어디에 얼마나 쓸지 미리 정해 두는 걸 [[예산]]이라고 해. 필요한 것부터 챙기는 거야.'],
+      ['wow','비싼 걸 갖고 싶으면? 사기 전에 [[저축]]으로 조금씩 모아서 사면 돼!'],
+      ['happy','이제 게임에 <b>상점</b>이 열렸어. 산 물건은 내 <b>가방</b>에 쏙 들어가.'],
+    ],
+    act:{type:'choose', items:[
+      {q:'겨울 외투가 작아져서 입을 수 없어. 새 외투는?', options:[
+        {t:'필요한 것', ok:true, why:'맞아! 추운 겨울에 외투는 꼭 있어야 해.'},
+        {t:'갖고 싶은 것', ok:false, why:'외투가 없으면 겨울에 추워. 꼭 필요한 거야.'},
+      ]},
+      {q:'게임기가 있는데 똑같은 게임기를 색깔만 다르게 하나 더?', options:[
+        {t:'필요한 것', ok:false, why:'이미 있잖아! 없어도 되는 거야.'},
+        {t:'갖고 싶은 것', ok:true, why:'맞아! 갖고 싶지만 꼭 필요하진 않아.'},
+      ]},
+      {q:'300코인짜리 자전거를 사고 싶어. 가장 좋은 방법은?', options:[
+        {t:'매달 조금씩 모아서 산다', ok:true, why:'멋져! 모아서 사면 다른 일에 쓸 돈도 지킬 수 있어.'},
+        {t:'지금 가진 돈을 다 쓰고 다음 달은 그때 생각한다', ok:false, why:'다 써 버리면 정말 필요한 데 쓸 돈이 없어져.'},
+      ]},
+    ]},
+    remember:['필요한 것부터 사요.','비싼 건 모아서 사요.'] },
+
+  { title:'채권은 무엇일까?', sub:'돈을 빌려주는 약속', unlock:'게임 지갑에 나라 채권·회사 채권이 열렸어요!',
+    talk:[
+      ['think','나라나 회사도 큰일을 하려면 돈이 모자랄 때가 있어. 그럴 땐 사람들에게 돈을 빌려.'],
+      ['happy','돈을 빌려준 사람은 "빌려줬다"는 약속 증서를 받아. 그게 [[채권]]이야.'],
+      ['cheer','채권을 사면 정해진 [[이자]]를 받고, 약속한 날인 [[만기]]가 되면 빌려준 돈, [[원금]]을 돌려받아.'],
+      ['wow','나라가 빌리는 [[국채]]는 아주 안전한 편이야. [[회사채]]는 이자를 더 주지만, 회사가 어려워지면 못 돌려받을 수도 있어.'],
+      ['think','이자를 더 준다는 건 그만큼 [[위험]]도 크다는 뜻일 때가 많아. 꼭 기억해!'],
+      ['happy','진짜로는 만기 전에 채권을 팔 수도 있는데, 게임에서는 만기까지 기다려야 돌려받아.'],
+    ],
+    act:{type:'ox', items:[
+      {q:'채권은 돈을 빌려줬다는 약속 증서다.', a:true, why:'맞아! 빌려준 대가로 이자를 받아.'},
+      {q:'만기가 되면 빌려준 돈을 돌려받는다.', a:true, why:'맞아! 만기는 돌려받기로 약속한 날이야.'},
+      {q:'이자를 많이 줄수록 언제나 더 안전하다.', a:false, why:'반대일 때가 많아. 이자를 많이 주는 곳은 위험도 큰 편이야.'},
+    ]},
+    remember:['채권은 돈을 빌려주고 이자를 받는 약속이에요.','이자가 높으면 위험도 높은 편이에요.'] },
+
+  { title:'주식은 무엇일까?', sub:'회사의 작은 주인',
+    talk:[
+      ['think','회사를 키우려면 공장도 짓고 사람도 뽑아야 해서 큰돈이 필요해.'],
+      ['wow','그래서 회사를 아주아주 잘게 나눈 조각을 팔아서 돈을 모아. 그 조각이 [[주식]]이야!'],
+      ['happy','주식을 사면 그 회사의 아주 작은 주인, [[주주]]가 돼.'],
+      ['cheer','회사가 돈을 잘 벌면 번 돈의 일부를 주주에게 나눠 주기도 해. 이걸 [[배당]]이라고 해.'],
+      ['think','주식은 [[증권 시장]]에서 사고팔아. 회사 주식을 모두 합친 값은 [[시가총액]]이라고 해서, 회사 크기를 잴 때 써.'],
+    ],
+    act:{type:'choose', items:[
+      {q:'어떤 회사 주식 1주를 샀어. 나는 이제…', options:[
+        {t:'그 회사의 아주 작은 주인이야', ok:true, why:'맞아! 주주가 된 거야.'},
+        {t:'그 회사 직원이 됐어', ok:false, why:'직원은 회사에서 일하는 사람이야. 주식을 사면 주인(주주)이 돼.'},
+        {t:'그 회사 물건을 공짜로 받아', ok:false, why:'아쉽지만 공짜 물건은 없어!'},
+      ]},
+      {q:'회사가 번 돈 일부를 주주에게 나눠 주는 것은?', options:[
+        {t:'배당', ok:true, why:'정답! 배당을 주지 않는 회사도 있어.'},
+        {t:'월급', ok:false, why:'월급은 일한 사람이 받는 돈이야.'},
+      ]},
+    ]},
+    remember:['주식은 회사의 작은 조각이에요.','주식을 사면 그 회사의 주주가 돼요.'] },
+
+  { title:'주가는 왜 오르내릴까?', sub:'사려는 사람, 팔려는 사람', unlock:'게임에 시장이 열렸어요! 회사 주식을 사고팔 수 있어요.',
+    talk:[
+      ['happy','주식 한 주의 가격을 [[주가]]라고 해.'],
+      ['wow','사려는 사람이 많으면 값이 오르고, 팔려는 사람이 많으면 값이 내려. 인기 많은 한정판 장난감 값이 오르는 것과 비슷해!'],
+      ['think','회사가 장사를 잘할 것 같은 소식이 들리면 사려는 사람이 늘어. 나쁜 소식이 들리면 팔려는 사람이 늘지.'],
+      ['cheer','산 값보다 비싸게 팔면 [[수익]], 싸게 팔면 [[손해]]야. 얼마나 늘었는지 %로 나타낸 걸 [[수익률]]이라고 해.'],
+      ['worry','그런데 내일 주가가 오를지 내릴지 정확히 아는 사람은 <b>아무도 없어</b>.'],
+      ['happy','이제 <b>시장</b>이 열렸어! 사기 전에 그 회사가 무슨 일을 하는지 먼저 읽어 봐. 우리나라에선 오르면 빨강, 내리면 파랑으로 보여 줘.'],
+    ],
+    act:{type:'choose', items:[
+      {q:'100코인에 산 주식을 120코인에 팔았어.', options:[
+        {t:'20코인 수익', ok:true, why:'정답! 수익률로는 +20%야.'},
+        {t:'20코인 손해', ok:false, why:'산 값보다 비싸게 팔았으니 번 거야.'},
+        {t:'120코인 수익', ok:false, why:'120코인은 판 값이야. 산 값 100을 빼야 해.'},
+      ]},
+      {q:'어떤 회사 주식을 사려는 사람이 갑자기 많아지면?', options:[
+        {t:'주가가 오를 가능성이 커', ok:true, why:'맞아! 사려는 사람이 많으면 값이 올라.'},
+        {t:'주가가 내릴 가능성이 커', ok:false, why:'팔려는 사람이 많을 때 내려.'},
+      ]},
+    ]},
+    remember:['사려는 사람이 많으면 주가가 올라요.','내일 주가는 아무도 정확히 몰라요.'] },
+
+  { title:'ETF는 무엇일까?', sub:'주식을 담은 바구니', unlock:'시장에 ETF가 열렸어요!',
+    talk:[
+      ['think','주식을 한 회사 것만 사면, 그 회사가 어려워질 때 크게 손해 볼 수 있어.'],
+      ['wow','[[ETF]]는 여러 회사 주식을 한 바구니에 담아 놓은 상품이야. 하나만 사도 바구니 속 회사들을 조금씩 다 가진 셈이야!'],
+      ['happy','예를 들어 반도체 ETF를 사면 반도체 회사 여러 곳에 한꺼번에 [[투자]]하는 거야.'],
+      ['cheer','ETF도 주식처럼 [[증권 시장]]에서 사고팔 수 있어.'],
+      ['think','바구니 속 한 회사가 크게 올라도 바구니 전체는 덜 오르고, 한 회사가 크게 떨어져도 덜 떨어져. 그래서 같은 분야 회사 하나만 산 것보다 <b>보통</b> 덜 출렁여.'],
+    ],
+    act:{type:'choose', items:[
+      {q:'ETF를 가장 잘 설명한 것은?', options:[
+        {t:'여러 회사 주식을 담은 바구니', ok:true, why:'정답!'},
+        {t:'은행에 맡기는 저금통장', ok:false, why:'그건 예금이야. ETF는 주식 바구니야.'},
+        {t:'나라에 돈을 빌려주는 증서', ok:false, why:'그건 국채야.'},
+      ]},
+      {q:'반도체 ETF 하나를 샀어. 나는…', options:[
+        {t:'반도체 회사 여러 곳에 조금씩 투자했어', ok:true, why:'맞아! 반도체 회사 하나만 산 것보다 보통 덜 출렁여.'},
+        {t:'반도체 회사 딱 한 곳에만 투자했어', ok:false, why:'ETF는 여러 회사를 담은 바구니야.'},
+      ]},
+    ]},
+    remember:['ETF는 여러 회사 주식을 담은 바구니예요.','같은 분야 한 회사만 사는 것보다 보통 덜 출렁여요.'] },
+
+  { title:'달걀을 한 바구니에 담지 마', sub:'나눠 담기와 위험',
+    talk:[
+      ['wow','달걀을 몽땅 한 바구니에 담았다가 그 바구니를 떨어뜨리면? 전부 깨지지!'],
+      ['happy','돈도 마찬가지야. 한곳에 몰지 않고 여러 곳에 나눠 넣는 걸 [[분산투자]]라고 해.'],
+      ['think','많이 벌 수 있는 곳일수록 많이 잃을 수도 있어. 이게 [[수익]]과 [[위험]]의 관계야.'],
+      ['cheer','보통은 저금통장 → 채권 → ETF → 주식 순서로 위험이 커져. 저금통장은 안전하지만 조금 불어나고, 주식은 많이 오를 수도, 많이 떨어질 수도 있어.'],
+      ['happy','그래서 똑똑한 투자자는 안전한 곳과 위험한 곳에 알맞게 나눠 담아.'],
+    ],
+    act:{type:'choose', items:[
+      {q:'다음 중 보통 가장 안전한 곳은?', options:[
+        {t:'저금통장', ok:true, why:'맞아! 대신 조금씩만 불어나.'},
+        {t:'한 회사 주식', ok:false, why:'한 회사 주식은 크게 오르기도, 크게 떨어지기도 해.'},
+        {t:'ETF', ok:false, why:'ETF는 주식 바구니라 주식보단 덜해도 오르내림이 있어.'},
+      ]},
+      {q:'1000코인이 있어. 분산투자에 가까운 것은?', options:[
+        {t:'저금·채권·ETF·주식에 나눠 넣기', ok:true, why:'멋져! 한곳이 떨어져도 다른 곳이 받쳐 줘.'},
+        {t:'제일 많이 오른 주식 하나에 다 넣기', ok:false, why:'그 주식이 떨어지면 한꺼번에 크게 잃어.'},
+      ]},
+    ]},
+    remember:['돈은 여러 곳에 나눠 담아요.','많이 벌 수 있는 곳은 많이 잃을 수도 있어요.'] },
+
+  { title:'목돈과 내 집', sub:'모은 돈으로 꿈 이루기', unlock:'지갑에 내 집 사기 목표가 열렸어요!',
+    talk:[
+      ['happy','조금씩 모은 돈이 오래 쌓여서 생긴 큰돈을 [[목돈]]이라고 해.'],
+      ['wow','집처럼 아주 비싼 건 목돈이 있어야 살 수 있어.'],
+      ['think','어른들은 모자란 돈을 은행에서 빌리기도 해. 이걸 [[대출]]이라고 하고, 빌린 돈엔 이자를 붙여 갚아야 해.'],
+      ['cheer','게임에서는 대출 없이, 모은 돈으로 집을 사 봐! 지갑에 <b>내 집 사기</b>가 열렸어.'],
+      ['happy','월급에서 꾸준히 저축하는 것, 그게 목돈을 만드는 가장 큰 힘이야.'],
+    ],
+    act:{type:'choose', items:[
+      {q:'매달 100코인씩 12달 동안 모으면 (이자는 빼고) 얼마일까?', options:[
+        {t:'1,200코인', ok:true, why:'정답! 이자까지 붙으면 조금 더 많아져.'},
+        {t:'112코인', ok:false, why:'100을 12번 더해야 해.'},
+        {t:'100코인', ok:false, why:'한 달 치만 센 거야.'},
+      ]},
+      {q:'대출을 받으면?', options:[
+        {t:'빌린 돈에 이자를 붙여 갚아야 해', ok:true, why:'맞아! 그래서 꼭 필요할 때만 신중하게 빌려야 해.'},
+        {t:'공짜로 받은 돈이라 안 갚아도 돼', ok:false, why:'대출은 빌린 돈이야. 꼭 갚아야 해.'},
+      ]},
+    ]},
+    remember:['꾸준히 모으면 목돈이 돼요.','빌린 돈은 이자까지 갚아야 해요.'] },
+
+  { title:'똑똑한 투자자의 약속', sub:'경제 박사 되기',
+    talk:[
+      ['cheer','드디어 마지막 코스야! 똑똑한 투자자의 <b>약속 다섯 가지</b>를 알려 줄게.'],
+      ['think','하나, 무슨 일을 하는지 모르는 회사엔 투자하지 않아. 먼저 알아봐.'],
+      ['think','둘, 친구나 인터넷에서 "무조건 오른대!" 하는 말만 듣고 따라 사지 않아.'],
+      ['worry','셋, 빌린 돈으로 투자하지 않아. 잃으면 빚만 남아.'],
+      ['happy','넷, 하루하루 오르내림에 너무 놀라지 않고 길게 봐. 다섯, 진짜 투자는 <b>부모님과 함께</b> 해!'],
+    ],
+    act:{type:'ox', items:[
+      {q:'무슨 일을 하는 회사인지 모르는데 친구가 오른대서 산다.', a:false, why:'모르는 회사엔 투자하지 않아. 먼저 알아봐!'},
+      {q:'빌린 돈으로 주식을 사는 건 위험하다.', a:true, why:'맞아! 잃으면 갚을 돈만 남아.'},
+      {q:'진짜 투자는 부모님과 함께 한다.', a:true, why:'맞아! 어른과 함께 하면 더 안전해.'},
+    ]},
+    remember:['모르는 곳엔 투자하지 않아요.','빌린 돈으로 투자하지 않아요.','진짜 투자는 부모님과 함께!'] },
+];
+// 이 코스를 끝내면 게임 기능이 열린다(코스 번호, 0부터)
+const FEAT = { game:1, shop:2, bond:3, stock:5, etf:6, house:8 };
+
+/* ---------- 종목: [분야, 회사, 하는 일, 대표 제품, 게임 시작 가격, 출렁임] — 가격은 게임용 가짜 ---------- */
+const SECTORS = {
+  '반도체':'🔌','배터리':'🔋','자동차':'🚗','조선':'🚢','하늘·국방':'✈️','인터넷·게임':'🎮','엔터':'🎤',
+  '먹거리·생활':'🍜','바이오':'💊','금융':'🏦','통신·전자':'📱','에너지·소재':'⚙️','유통':'🛒',
+};
+const CO = [
+  ['반도체','삼성전자','반도체와 스마트폰·TV를 만들어요','갤럭시 스마트폰, 메모리 반도체',70,1],
+  ['반도체','SK하이닉스','컴퓨터가 기억하는 데 쓰는 메모리 반도체를 만들어요','D램, AI용 HBM',180,1.3],
+  ['반도체','한미반도체','반도체를 만드는 기계를 만들어요','반도체 칩을 쌓아 붙이는 장비',90,1.6],
+  ['반도체','DB하이텍','다른 회사가 설계한 반도체를 대신 만들어 줘요','반도체 위탁 생산',45,1.3],
+  ['배터리','LG에너지솔루션','전기차에 들어가는 배터리를 만들어요','전기차 배터리',360,1.2],
+  ['배터리','삼성SDI','전기차·전자제품 배터리를 만들어요','전기차 배터리',250,1.3],
+  ['배터리','에코프로비엠','배터리 속 재료(양극재)를 만들어요','양극재',120,1.7],
+  ['배터리','포스코퓨처엠','배터리 재료(양극재·음극재)를 만들어요','양극재, 음극재',150,1.6],
+  ['자동차','현대자동차','자동차를 만들어 팔아요','아반떼, 아이오닉 5',210,1],
+  ['자동차','기아','자동차를 만들어 팔아요','쏘렌토, EV9',100,1],
+  ['자동차','현대모비스','자동차에 들어가는 부품을 만들어요','자동차 부품',240,0.9],
+  ['자동차','한국타이어앤테크놀로지','자동차 타이어를 만들어요','한국타이어',45,1],
+  ['조선','HD현대중공업','아주 큰 배를 만들어요','LNG 운반선, 군함',300,1.4],
+  ['조선','한화오션','큰 배와 잠수함을 만들어요','LNG 운반선, 잠수함',80,1.5],
+  ['조선','삼성중공업','큰 배를 만들어요','LNG 운반선',15,1.5],
+  ['하늘·국방','한화에어로스페이스','비행기 엔진과 나라를 지키는 장비를 만들어요','K9 자주포, 비행기 엔진',400,1.4],
+  ['하늘·국방','LIG디펜스&에어로스페이스','나라를 지키는 미사일·레이더를 만들어요','천궁 미사일',250,1.4],
+  ['하늘·국방','한국항공우주산업','비행기와 헬리콥터를 만들어요','KF-21 전투기, 수리온 헬기',70,1.3],
+  ['하늘·국방','대한항공','비행기로 사람과 짐을 실어 날라요','국내·해외 비행기 여행',25,1],
+  ['인터넷·게임','NAVER','검색, 웹툰, 쇼핑 서비스를 운영해요','네이버 검색, 네이버웹툰',200,1.1],
+  ['인터넷·게임','카카오','메신저와 여러 앱 서비스를 운영해요','카카오톡',45,1.2],
+  ['인터넷·게임','크래프톤','게임을 만들어요','배틀그라운드',300,1.3],
+  ['인터넷·게임','엔씨(옛 엔씨소프트)','게임을 만들어요','리니지',180,1.5],
+  ['인터넷·게임','넷마블','휴대폰 게임을 만들어요','모바일 게임',50,1.5],
+  ['엔터','하이브','가수를 키우고 음반·공연을 만들어요','BTS, 세븐틴',250,1.5],
+  ['엔터','JYP Ent.','가수를 키우고 음반·공연을 만들어요','트와이스, 스트레이 키즈',70,1.5],
+  ['엔터','에스엠','가수를 키우고 음반·공연을 만들어요','에스파, NCT',90,1.5],
+  ['엔터','와이지엔터테인먼트','가수를 키우고 음반·공연을 만들어요','블랙핑크, 베이비몬스터',60,1.6],
+  ['엔터','CJ ENM','TV 방송과 영화를 만들어요','tvN, 영화',70,1.3],
+  ['먹거리·생활','농심','라면과 과자를 만들어요','신라면, 새우깡',400,0.8],
+  ['먹거리·생활','오리온','과자를 만들어요','초코파이, 꼬북칩',100,0.8],
+  ['먹거리·생활','CJ제일제당','여러 가지 먹거리를 만들어요','햇반, 비비고 만두',250,0.8],
+  ['먹거리·생활','오뚜기','라면과 소스, 즉석식품을 만들어요','진라면, 케첩, 3분 카레',400,0.7],
+  ['먹거리·생활','아모레퍼시픽','화장품을 만들어요','설화수, 라네즈',120,1.1],
+  ['바이오','삼성바이오로직스','다른 회사의 약을 대신 만들어 줘요','바이오 의약품 위탁 생산',800,1],
+  ['바이오','셀트리온','병을 고치는 바이오 약을 만들어요','바이오시밀러',180,1.2],
+  ['바이오','유한양행','약을 만들어요','렉라자(폐암 약)',110,1.3],
+  ['금융','KB금융','은행과 여러 금융 회사를 가지고 있어요','KB국민은행',100,0.8],
+  ['금융','신한지주','은행과 여러 금융 회사를 가지고 있어요','신한은행',60,0.8],
+  ['금융','카카오뱅크','지점 없이 앱으로 하는 은행이에요','카카오뱅크 앱',25,1.1],
+  ['금융','삼성화재','사고가 나면 돈을 보태 주는 보험을 팔아요','자동차 보험',400,0.7],
+  ['통신·전자','SK텔레콤','휴대폰 통신과 인터넷을 연결해 줘요','휴대폰 통신',55,0.6],
+  ['통신·전자','KT','휴대폰·집 인터넷을 연결해 줘요','인터넷, 휴대폰 통신',50,0.6],
+  ['통신·전자','LG전자','집에서 쓰는 가전제품을 만들어요','냉장고, 세탁기, TV',90,1],
+  ['에너지·소재','POSCO홀딩스','철을 만드는 회사들을 가지고 있어요','철강(포스코)',300,1.1],
+  ['에너지·소재','한국전력','집과 공장에 전기를 보내 줘요','전기',30,0.9],
+  ['에너지·소재','S-Oil','원유로 휘발유·경유를 만들어요','휘발유, 경유',60,1],
+  ['유통','이마트','대형 마트를 운영해요','이마트, 트레이더스',70,0.9],
+  ['유통','BGF리테일','편의점을 운영해요','CU 편의점',110,0.8],
+].map(([sec, name, does, prod, p, vol], i) => ({ id:'c' + i, sec, name, does, prod, p, vol }));
+// ETF는 바구니 속 회사들의 평균 움직임을 따라간다(게임 시작 = 100)
+const ETFS = [
+  { id:'e0', name:'한국 대표 ETF', secs:Object.keys(SECTORS), does:`게임 속 ${CO.length}개 회사를 모두 조금씩 담은 바구니예요.` },
+  { id:'e1', name:'반도체 ETF', secs:['반도체'], does:'반도체 회사들을 담은 바구니예요.' },
+  { id:'e2', name:'자동차·배터리 ETF', secs:['자동차','배터리'], does:'자동차와 배터리 회사들을 담은 바구니예요.' },
+  { id:'e3', name:'K-컬처 ETF', secs:['엔터','인터넷·게임'], does:'가수·방송·게임 회사들을 담은 바구니예요.' },
+  { id:'e4', name:'생활 필수 ETF', secs:['먹거리·생활','통신·전자','유통'], does:'먹거리·통신·마트처럼 늘 쓰는 것을 파는 회사들을 담은 바구니예요.' },
+];
+ETFS.forEach(e => { e.mem = CO.filter(c => e.secs.includes(c.sec)).map(c => c.id); e.sec = 'ETF'; e.prod = e.mem.length + '개 회사'; });
+const NEWS = {
+  '반도체':['AI 컴퓨터가 많이 팔려서 반도체가 더 필요하대요!','반도체가 창고에 너무 많이 쌓였대요.'],
+  '배터리':['전기차를 사는 사람이 늘었대요!','전기차 판매가 줄었대요.'],
+  '자동차':['우리 자동차가 외국에서 인기래요!','외국에 차를 팔기가 어려워졌대요.'],
+  '조선':['큰 배 주문이 잔뜩 들어왔대요!','배 주문이 줄었대요.'],
+  '하늘·국방':['외국에서 우리 비행기와 장비를 사 간대요!','수출 계약이 미뤄졌대요.'],
+  '인터넷·게임':['새 게임이 엄청난 인기래요!','기대했던 새 게임 인기가 별로래요.'],
+  '엔터':['가수들 세계 공연 표가 다 팔렸대요!','큰 공연이 미뤄졌대요.'],
+  '먹거리·생활':['우리 라면과 과자가 외국에서 인기래요!','재료값이 많이 올랐대요.'],
+  '바이오':['새 약 실험이 성공했대요!','새 약 실험 결과가 아쉽대요.'],
+  '금융':['은행들이 돈을 많이 벌었대요!','빌린 돈을 못 갚는 사람이 늘었대요.'],
+  '통신·전자':['새 가전제품이 잘 팔린대요!','가전제품 판매가 줄었대요.'],
+  '에너지·소재':['공장들이 철과 기름을 많이 쓴대요!','철과 기름이 덜 팔린대요.'],
+  '유통':['마트와 편의점에 손님이 늘었대요!','마트 손님이 줄었대요.'],
+};
+const SHOP = [
+  ['ice','🍦','아이스크림',5],['comic','📚','만화책',15],['ball','⚽','축구공',30],['doll','🧸','곰 인형',40],
+  ['shoes','👟','운동화',80],['lego','🧱','블록 장난감',120],['bike','🚲','자전거',300],['game','🎮','게임기',450],
+  ['trip','🏖️','가족 여행',600],['pc','💻','컴퓨터',800],
+].map(([id, em, name, price]) => ({ id, em, name, price }));
+const HOUSES = [
+  { id:'h0', em:'🏠', name:'아담한 집', price:4000 },
+  { id:'h1', em:'🏢', name:'아파트', price:10000 },
+  { id:'h2', em:'🏡', name:'마당 있는 집', price:24000 },
+];
+// 집 모양 게이지: 벽돌 10줄(아래 8줄 = 벽, 위 2줄 = 지붕)이 아래부터 한 줄씩 쌓인다
+let hgN = 0;
+function houseGauge(ratio, size){
+  const id = 'hg' + (++hgN), r = Math.max(0, Math.min(1, ratio)), lv = r * 10, full = Math.floor(lv);
+  const shape = 'M32 3 L61 27 L54 27 L54 61 L10 61 L10 27 L3 27 Z';
+  const top = 3, bot = 61, h = (bot - top) / 10;
+  let rows = '';
+  for (let k = 0; k < 10; k++){
+    const y = bot - (k + 1) * h, on = k < full, part = k === full && lv > full;
+    if (!on && !part) continue;
+    const roof = k >= 8 ? ' roof' + (r >= 1 ? ' full' : '') : '';
+    rows += `<rect class="brick${part ? ' part' : ''}${roof}" x="0" y="${y.toFixed(2)}" width="64" height="${h.toFixed(2)}"/>`;
+    if (k < 8) rows += [0, 1, 2].map(j => { const x = 10 + (k % 2 ? 7 : 14) + j * 15; return x < 54 ? `<line class="seam" x1="${x}" y1="${y.toFixed(2)}" x2="${x}" y2="${(y + h).toFixed(2)}"/>` : ''; }).join('');
+    rows += `<line class="seam" x1="0" y1="${y.toFixed(2)}" x2="64" y2="${y.toFixed(2)}"/>`;
+  }
+  return `<svg class="hg ${r >= 1 ? 'done' : ''}" width="${size}" height="${size}" viewBox="0 0 64 64" role="img" aria-label="집 게이지 ${Math.floor(r * 100)}%">
+    <defs><clipPath id="${id}"><path d="${shape}"/></clipPath></defs>
+    <path class="wall" d="${shape}"/><g clip-path="url(#${id})">${rows}</g>
+    <path class="edge" d="${shape}"/><rect class="edge" x="27" y="44" width="10" height="17" rx="2"/></svg>`;
+}
+const BONDS = {
+  gov:{ name:'나라 채권(국채)', rate:0.004, risk:0, why:'나라에 빌려줘요. 매달 이자 0.4%(게임용), 아주 안전해요.' },
+  corp:{ name:'회사 채권(회사채)', rate:0.007, risk:0.002, why:'회사에 빌려줘요. 매달 이자 0.7%(게임용), 대신 아주 가끔 못 돌려받을 수 있어요.' },
+};
+// 30초 = 한 달(하루 1초), 120달 = 10년 = 놀이 시간 1시간
+const G0 = { START:1000, SALARY:200, MONTHS:120, DAYS:30, TICK:1000, BANK:0.003, UNIT:100, BOND_M:12, REST:3600 };
+const ym = m => `${Math.floor((m - 1) / 12) + 1}년 ${(m - 1) % 12 + 1}월`;
+
+/* ---------- 저장 ---------- */
+const K = { done:'hi-econ-done', game:'hi-econ-game', best:'hi-econ-best', homes:'hi-econ-homes' };
+const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch(e){ return d; } };
+const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+let done = load(K.done, []);
+let G = load(K.game, null);
+let homes = load(K.homes, []);
+let best = load(K.best, 0);
+const has = f => done.length > FEAT[f];
+
+/* ---------- 도구 ---------- */
+const app = document.getElementById('app'), layer = document.getElementById('layer');
+const fmt = n => Math.round(n).toLocaleString('ko-KR');
+const fmtP = p => p < 10 ? p.toFixed(1) : fmt(p);
+const pct = x => (x >= 0 ? '+' : '') + (x * 100).toFixed(1) + '%';
+const ud = x => x > 0.0005 ? 'up' : x < -0.0005 ? 'down' : '';
+const gauss = () => Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random());
+const ALL = [...CO, ...ETFS];
+const byId = id => ALL.find(x => x.id === id);
+
+let S = { view:'home', tab:'wallet', filter:'전체', qty:1, paused:true };
+
+/* ---------- 게임 엔진 ---------- */
+function newGame(){
+  const p = {}, h = {};
+  CO.forEach(c => { p[c.id] = c.p * (0.9 + Math.random() * 0.2); });
+  G = { month:1, day:0, cash:G0.START, bank:0, rate:30, hold:{}, bonds:[], bag:[], p, p0:{...p}, pm:{}, h, boost:[], news:null, realized:0, modal:{type:'pay', first:true, rate:30}, over:null, log:[] };
+  etfPrices(); ALL.forEach(x => { G.h[x.id] = [G.p[x.id]]; G.pm[x.id] = G.p[x.id]; });
+  S.paused = false; saveG();
+}
+function etfPrices(){
+  ETFS.forEach(e => { G.p[e.id] = 100 * e.mem.reduce((s, id) => s + G.p[id] / G.p0[id], 0) / e.mem.length; });
+}
+function saveG(){ store(K.game, G); }
+function worth(){
+  const inv = Object.entries(G.hold).reduce((s, [id, x]) => s + x.q * G.p[id], 0);
+  const bonds = G.bonds.reduce((s, b) => s + b.amt, 0);
+  const house = G.bag.filter(b => b.id[0] === 'h').reduce((s, b) => s + byItem(b).price, 0);
+  return { cash:G.cash, bank:G.bank, inv, bonds, house, money:G.cash + G.bank + inv + bonds, total:G.cash + G.bank + inv + bonds + house };
+}
+function step(){
+  const m = gauss() * 0.01 + 0.0002;
+  const sec = {};
+  Object.keys(SECTORS).forEach(s => { sec[s] = gauss() * 0.008; });
+  G.boost.forEach(b => { sec[b.sec] += b.v; b.left--; });
+  G.boost = G.boost.filter(b => b.left > 0);
+  CO.forEach(c => { G.p[c.id] = Math.max(1, G.p[c.id] * Math.exp(m + sec[c.sec] + gauss() * 0.014 * c.vol)); });
+  etfPrices();
+  ALL.forEach(x => { const a = G.h[x.id]; a.push(G.p[x.id]); if (a.length > 90) a.shift(); });
+  G.day++;
+  if (G.day === 12 && Math.random() < 0.7){
+    const keys = Object.keys(SECTORS), s = keys[Math.floor(Math.random() * keys.length)], good = Math.random() < 0.55;
+    G.boost.push({ sec:s, v:good ? 0.006 : -0.006, left:10 });
+    G.news = { sec:s, good, t:NEWS[s][good ? 0 : 1], m:G.month };
+  }
+  if (G.day >= G0.DAYS) monthEnd();
+}
+function monthEnd(){
+  const note = [];
+  const bi = G.bank * G0.BANK;
+  if (bi > 0){ G.bank += bi; note.push(`저금통장 이자 +${fmt(bi)}`); }
+  let bondI = 0;
+  G.bonds.forEach(b => {
+    if (Math.random() < BONDS[b.kind].risk){ b.amt = 0; note.push(`앗! ${BONDS[b.kind].name}을 낸 회사가 어려워져서 돈을 못 돌려받았어요.`); return; }
+    const it = b.amt * BONDS[b.kind].rate; G.cash += it; bondI += it; b.left--;
+    if (b.left <= 0){ G.cash += b.amt; note.push(`${BONDS[b.kind].name} 만기! ${fmt(b.amt)}코인을 돌려받았어요.`); b.amt = 0; }
+  });
+  G.bonds = G.bonds.filter(b => b.amt > 0);
+  if (bondI > 0) note.push(`채권 이자 +${fmt(bondI)}`);
+  G.month++; G.day = 0;
+  ALL.forEach(x => { G.pm[x.id] = G.p[x.id]; });
+  if (G.month > G0.MONTHS) return endGame('time');
+  if (G.auto){
+    const save = Math.round(G0.SALARY * G.rate / 100);
+    G.bank += save; G.cash += G0.SALARY - save; G.paid = (G.paid || 0) + G0.SALARY;
+    G.note = { m:G.month, t:[`💸 월급 ${G0.SALARY} 중 ${save}코인 자동 저금`, ...note] };
+  } else G.modal = { type:'pay', note, rate:G.rate };
+  saveG();
+}
+function endGame(why){
+  G.over = why; G.modal = null;
+  const t = worth().total;
+  if (t > best){ best = t; store(K.best, best); }
+  saveG();
+}
+const running = () => G && !G.over && !G.modal && !S.paused && !S.sheet && !S.rest && S.view === 'game' && !document.hidden;
+setInterval(() => {
+  if (!running()) return;
+  step(); if (G.day % 5 === 0) saveG();
+  S.played = (S.played || 0) + G0.TICK / 1000;
+  if (S.played % G0.REST === 0) S.rest = true;
+  render();
+}, G0.TICK);
+document.addEventListener('visibilitychange', () => { if (document.hidden && G){ saveG(); } });
+
+/* ---------- 화면: 배우기 ---------- */
+function homeView(){
+  const n = done.length, next = n < 10 ? n : -1;
+  const say = n === 0 ? '안녕! 나는 콩콩이야. <b>경제 코스 10개</b>를 배우면서 [[월급]], [[저축]], [[주식]]을 알아보자. 코스를 하나 들을 때마다 게임에 새 칸이 열려!'
+    : n < 10 ? `벌써 <b>${n}개</b> 들었어! 다음 코스를 들으면 게임에서 할 수 있는 게 더 많아져.`
+    : '경제 코스를 모두 마쳤어! 이제 게임의 모든 칸이 열렸어. 내 집을 마련해 봐!';
+  const list = COURSES.map((c, i) => {
+    const st = done.includes(i) ? 'done' : i === next ? 'next' : '';
+    const lock = !done.includes(i) && i !== next;
+    return `<button class="course ${st}" data-a="open" data-i="${i}" ${lock ? 'disabled' : ''}>
+      <span class="n">${done.includes(i) ? '✓' : i + 1}</span><span><b>${c.title}</b><small>${c.sub}</small></span>
+      <span class="tag">${c.unlock && !lock ? '🔓' : lock ? '🔒' : ''}</span></button>`;
+  }).join('');
+  const cert = n >= 10 ? `<div class="cert"><p class="small" style="color:inherit">콩콩이 경제교실</p><h2>꼬마 경제 박사 인증서</h2>
+    <p>돈과 저축, 채권, 주식, ETF, 나눠 담기, 목돈까지<br>경제 코스 10개를 모두 마쳤어요.</p><p class="small" style="color:inherit">${load('hi-econ-cert', '') || ''}</p></div>` : '';
+  return stage(n >= 10 ? 'cheer' : 'happy', say) + `
+    <button class="door" data-a="tab" data-v="game" ${has('game') ? '' : 'disabled'}><span class="ic">🪙</span><span><b>경제 게임 하러 가기</b>
+      <small>${has('game') ? (G && !G.over ? `${ym(Math.min(G.month, G0.MONTHS))}까지 했어요. 이어서 해요!` : '월급 받고, 저금하고, 투자해서 내 집까지!') : '코스 2개를 들으면 열려요'}</small></span></button>
+    ${cert}
+    <h2 class="sec">경제 코스 10개</h2><div class="list">${list}</div>`;
+}
+
+function lessonView(){
+  const L = COURSES[S.li];
+  const steps = L.talk.length + 2;
+  const at = S.phase === 'talk' ? S.ti : S.phase === 'act' ? L.talk.length : steps - 1;
+  const dots = Array.from({length:steps}, (_, k) => `<i class="${k <= at ? 'on' : ''}"></i>`).join('');
+  let body;
+  if (S.phase === 'talk'){
+    const [mood, say] = L.talk[S.ti], last = S.ti === L.talk.length - 1;
+    body = stage(mood, say) + `<div class="row end">${S.ti > 0 ? '<button class="btn ghost" data-a="prev">이전</button>' : ''}
+      <button class="btn" data-a="${last ? 'act' : 'next'}">${last ? '문제 풀러 가기' : '다음'}</button></div>`;
+  } else if (S.phase === 'act'){
+    body = stage(S.mood, S.say) + `<div class="panel">${actView(L.act)}</div>`;
+  } else {
+    body = stage('cheer', S.li === 9 ? '축하해! <b>꼬마 경제 박사 인증서</b>를 받았어!' : '최고야! 코스 하나 끝! <b>꼭 기억할 것</b>이야.') + `<div class="panel">
+      <div class="memo"><h3>꼭 기억해요</h3><ul>${L.remember.map(r => `<li>${r}</li>`).join('')}</ul></div>
+      ${L.unlock ? `<div class="unlock">🔓 ${L.unlock}</div>` : ''}
+      <div class="row end"><button class="btn ghost" data-a="tab" data-v="home">코스 목록</button>
+      ${has('game') ? '<button class="btn sky" data-a="tab" data-v="game">게임 하기</button>' : ''}
+      ${S.li < 9 ? '<button class="btn" data-a="open" data-i="' + (S.li + 1) + '">다음 코스</button>' : ''}</div></div>`;
+  }
+  return `<div class="lhead"><button class="back" data-a="tab" data-v="home">← 코스 목록</button><div class="dots">${dots}</div></div>
+    <h1 class="ltitle"><em>${S.li + 1}</em>${L.title}</h1>` + body;
+}
+function actView(a){
+  const it = a.items[S.r], an = S.ans, more = S.r < a.items.length - 1;
+  const nb = an && an.ok ? `<div class="row end"><button class="btn" data-a="${more ? 'round' : 'finish'}">${more ? '다음 문제' : '코스 끝내기'}</button></div>` : '';
+  if (a.type === 'ox'){
+    const cls = v => an && an.v === v ? (an.ok ? 'right' : 'wrong') : '';
+    return `<p class="q">${S.r + 1}/${a.items.length}. ${it.q}</p><div class="ox">
+      <button class="oxb o ${cls(true)}" data-a="ox" data-v="1" aria-label="맞아요">O</button>
+      <button class="oxb x ${cls(false)}" data-a="ox" data-v="0" aria-label="아니에요">X</button></div>${nb}`;
+  }
+  const opts = it.options.map((o, k) => `<button class="opt ${an && an.ok && an.k === k ? 'right' : S.tried.includes(k) ? 'wrong' : ''}" data-a="pick" data-k="${k}">${o.t}</button>`).join('');
+  return `<p class="q">${S.r + 1}/${a.items.length}. ${it.q}</p><div class="opts">${opts}</div>${nb}`;
+}
+
+function dictView(){
+  const words = Object.keys(GLOSS).sort((a, b) => a.localeCompare(b, 'ko'));
+  return stage('think', '궁금한 낱말을 눌러 봐! 코스나 게임에서 <b>밑줄 친 낱말</b>을 눌러도 설명이 나와.') +
+    `<div class="panel"><div class="row">${words.map(w => `<button class="chip" data-a="term" data-t="${w}">${w}</button>`).join('')}</div></div>`;
+}
+
+/* ---------- 화면: 게임 ---------- */
+function gameView(){
+  if (!has('game')) return stage('think', '게임은 <b>코스 2개</b>를 들으면 열려. 먼저 [[월급]]과 [[저축]]을 배우자!') + '<div class="row end"><button class="btn" data-a="tab" data-v="home">코스 들으러 가기</button></div>';
+  if (!G) return stage('cheer', `게임에서는 <b>30초가 한 달</b>이야. 처음에 ${fmt(G0.START)}코인을 받고, 매달 [[월급]] ${G0.SALARY}코인이 들어와. 최대 <b>10년</b>(약 1시간) 동안 모으고 불려서 <b>마당 있는 집</b>까지 가 봐! 중간에 꺼도 이어서 할 수 있어.`) +
+    `<div class="row end"><button class="btn" data-a="new">게임 시작</button></div>`;
+  if (G.over) return resultView();
+  const w = worth(), mon = Math.min(G.month, G0.MONTHS);
+  const owned = G.bag.map(b => b.id), goal = HOUSES.find(h => !owned.includes(h.id)) || HOUSES[2];
+  const gbar = `<div class="gbar"><div class="row between">
+      <span class="when">${ym(mon)} ${G.day + 1}일</span>
+      <span class="money"><span class="pill">🪙 ${fmt(G.cash)}</span><button class="icon" data-a="pause">${S.paused ? '▶ 계속' : '⏸ 멈춤'}</button></span></div>
+    <div class="mbar" title="이번 달 지나간 날"><i style="width:${G.day / G0.DAYS * 100}%"></i></div>
+    <div class="row between small" style="margin-top:4px"><span>[[재산]] <b>${fmt(w.total)}</b>코인</span><span>${Math.floor((G0.MONTHS - mon) / 12)}년 ${(G0.MONTHS - mon) % 12}달 남음</span></div>
+    ${G.note && G.note.m === G.month ? `<p class="small" style="margin:2px 0 0">${G.note.t.join(' · ')} <button class="term" data-a="auto">매달 묻기로</button></p>` : ''}
+    <div class="goalrow">${houseGauge(w.money / goal.price, 46)}<p class="small"><b>목표: ${goal.name}</b> (${fmt(goal.price)}코인)<br>모은 돈으로 ${Math.min(100, Math.floor(w.money / goal.price * 100))}% 쌓았어요</p></div>
+    ${G.news && G.news.m === G.month ? `<div class="news">📰 <b>${SECTORS[G.news.sec]} ${G.news.sec}</b> 소식: ${G.news.t} <span class="small">(게임 속 가짜 뉴스)</span></div>` : ''}
+  </div>`;
+  const tab = { market:marketTab, wallet:walletTab, shop:shopTab, bag:bagTab }[S.tab]();
+  return T(gbar) + tab;
+}
+function marketTab(){
+  if (!has('stock')) return stage('think', '시장은 <b>6번 코스</b>를 들으면 열려. 주식이 뭔지 먼저 배우자!');
+  const chips = ['전체', ...(has('etf') ? ['ETF'] : []), '내 것', ...Object.keys(SECTORS)];
+  const rows = x => {
+    const ch = G.p[x.id] / G.pm[x.id] - 1, mine = G.hold[x.id];
+    return `<button class="stock ${mine ? 'mine' : ''}" data-a="co" data-id="${x.id}"><b>${x.name}</b><span class="pr">${fmtP(G.p[x.id])}</span>
+      <small>${mine ? `💼 ${mine.q}주 · ` : ''}${x.sec === 'ETF' ? x.does : x.does}</small><span class="ch ${ud(ch)}">${pct(ch)}</span></button>`;
+  };
+  let body;
+  const f = S.filter;
+  if (f === 'ETF') body = ETFS.map(rows).join('');
+  else if (f === '내 것') body = Object.keys(G.hold).map(id => rows(byId(id))).join('') || '<p class="small">아직 산 주식이 없어요.</p>';
+  else if (f === '전체') body = (has('etf') ? `<p class="grp">🧺 ETF</p>` + ETFS.map(rows).join('') : '') +
+      Object.keys(SECTORS).map(s => `<p class="grp">${SECTORS[s]} ${s}</p>` + CO.filter(c => c.sec === s).map(rows).join('')).join('');
+  else body = CO.filter(c => c.sec === f).map(rows).join('');
+  return `<div class="chips">${chips.map(c => `<button class="chip ${f === c ? 'on' : ''}" data-a="filter" data-v="${c}">${SECTORS[c] || ''} ${c}</button>`).join('')}</div>
+    <p class="small" style="margin:4px 2px">바뀐 정도는 이번 달 1일과 비교한 거예요. <span class="up">빨강 = 올랐어요</span> · <span class="down">파랑 = 내렸어요</span></p>
+    <div class="list">${body}</div><p class="fake">회사 이름과 하는 일은 진짜, 가격과 뉴스는 게임용 가짜예요.</p>`;
+}
+function walletTab(){
+  const w = worth();
+  const gain = w.total - G0.START - (G.paid || 0) + G.bag.filter(b => b.id[0] !== 'h').reduce((s, b) => s + byItem(b).price, 0);
+  const hold = Object.entries(G.hold).map(([id, x]) => {
+    const v = x.q * G.p[id], r = v / x.cost - 1;
+    return `<button class="stock" data-a="co" data-id="${id}"><b>${byId(id).name}</b><span class="pr">${fmt(v)}</span><small>${x.q}주 · 산 값 ${fmt(x.cost)}</small><span class="ch ${ud(r)}">${pct(r)}</span></button>`;
+  }).join('');
+  const bonds = has('bond') ? `<div class="panel"><h2>📜 [[채권]]</h2><p class="small" style="margin:0">하나에 ${G0.UNIT}코인. ${G0.BOND_M}달 뒤 [[만기]]에 돌려받고, 그동안 매달 이자를 받아요.</p>
+    ${Object.entries(BONDS).map(([k, b]) => `<div class="row between"><span><b>${b.name}</b><br><span class="small">${b.why}</span></span><button class="btn sm" data-a="bond" data-k="${k}" ${G.cash < G0.UNIT ? 'disabled' : ''}>사기</button></div>`).join('')}
+    ${G.bonds.length ? G.bonds.map(b => `<div class="kv"><span>${BONDS[b.kind].name}</span><b>${fmt(b.amt)} · ${b.left}달 남음</b></div>`).join('') : ''}</div>` : '';
+  const house = `<div class="panel"><h2>🏡 내 집 사기</h2><p class="small" style="margin:0">${has('house') ? '현금으로 사요. 저금통장이나 투자한 돈은 먼저 현금으로 바꿔야 해요.' : '🔒 9번 코스를 들으면 살 수 있어요. 그때까지 벽돌을 차곡차곡 쌓아 둬!'}</p>
+    ${HOUSES.map(h => { const own = G.bag.some(b => b.id === h.id); return `<div class="house">${houseGauge(own ? 1 : w.money / h.price, 52)}<span><b class="disp">${h.em} ${h.name}</b><br><span class="small">${fmt(h.price)}코인 · ${own ? '내 집!' : Math.min(100, Math.floor(w.money / h.price * 100)) + '%'}</span></span>
+      ${has('house') && !own ? `<button class="btn sm" data-a="house" data-id="${h.id}" ${G.cash < h.price ? 'disabled' : ''}>사기</button>` : ''}</div>`; }).join('')}</div>`;
+  return T(`<div class="list">
+    <div class="panel"><h2>💰 내 [[재산]]</h2><div class="total">${fmt(w.total)}코인</div>
+      <div class="kv"><span>현금(지갑)</span><b>${fmt(w.cash)}</b></div>
+      <div class="kv"><span>저금통장</span><b>${fmt(w.bank)}</b></div>
+      ${has('bond') ? `<div class="kv"><span>채권</span><b>${fmt(w.bonds)}</b></div>` : ''}
+      ${has('stock') ? `<div class="kv"><span>주식·ETF</span><b>${fmt(w.inv)}</b></div>` : ''}
+      <div class="kv"><span>지금까지 불린 돈 (받은 돈·쓴 돈 빼고)</span><b class="${ud(gain)}">${gain >= 0 ? '+' : ''}${fmt(gain)}</b></div></div>
+    <div class="panel"><h2>🐷 저금통장</h2><p class="small" style="margin:0">매달 [[이자]] ${G0.BANK * 100}% (게임용). 월급날 저금 비율: <b>${G.rate}%</b>${G.auto ? ' · 자동' : ''}</p>
+      <div class="kv"><span>통장에 든 돈</span><b>${fmt(G.bank)}</b></div>
+      <div class="row"><span class="small">넣기</span>${[50, 100].map(v => `<button class="btn sm sky" data-a="dep" data-v="${v}" ${G.cash < v ? 'disabled' : ''}>${v}</button>`).join('')}<button class="btn sm sky" data-a="dep" data-v="all" ${G.cash < 1 ? 'disabled' : ''}>전부</button></div>
+      <div class="row"><span class="small">빼기</span>${[50, 100].map(v => `<button class="btn sm ghost" data-a="wd" data-v="${v}" ${G.bank < v ? 'disabled' : ''}>${v}</button>`).join('')}<button class="btn sm ghost" data-a="wd" data-v="all" ${G.bank < 1 ? 'disabled' : ''}>전부</button></div></div>
+    ${bonds}
+    ${hold ? `<div class="panel"><h2>💼 내 주식·ETF</h2><div class="list">${hold}</div></div>` : ''}
+    ${house}</div>`);
+}
+const byItem = b => SHOP.find(x => x.id === b.id) || HOUSES.find(x => x.id === b.id);
+function shopTab(){
+  if (!has('shop')) return stage('think', '상점은 <b>3번 코스</b>를 들으면 열려.');
+  return stage('think', '사기 전에 생각해 봐! <b>필요한 것</b>일까, <b>갖고 싶은 것</b>일까? 산 물건은 가방에 들어가고, 쓴 돈은 돌아오지 않아.') +
+    `<div class="shop">${SHOP.map(s => `<div class="item"><span class="em">${s.em}</span><b>${s.name}</b><span class="small">${fmt(s.price)}코인</span>
+      <button class="btn sm" data-a="buyitem" data-id="${s.id}" ${G.cash < s.price ? 'disabled' : ''}>사기</button></div>`).join('')}</div>`;
+}
+function bagTab(){
+  if (!has('shop')) return stage('think', '가방은 <b>3번 코스</b>를 들으면 열려.');
+  const spent = G.bag.reduce((s, b) => s + byItem(b).price, 0);
+  return `<div class="panel"><h2>🎒 내 가방</h2><p class="small" style="margin:0">이번 게임에서 산 물건 ${G.bag.length}개 · 쓴 돈 ${fmt(spent)}코인</p>
+    ${G.bag.length ? `<div class="bag">${G.bag.map(b => { const x = byItem(b); return `<div><span class="em">${x.em}</span>${x.name}<br><span class="small">${ym(b.m)}</span></div>`; }).join('')}</div>` : '<p class="small">아직 비어 있어요.</p>'}</div>
+    ${homes.length ? `<div class="panel"><h2>🔑 내가 마련한 집</h2><div class="bag">${homes.map(id => { const h = HOUSES.find(x => x.id === id); return `<div><span class="em">${h.em}</span>${h.name}</div>`; }).join('')}</div></div>` : ''}`;
+}
+function resultView(){
+  const w = worth();
+  const h = G.house && HOUSES.find(x => x.id === G.house);
+  const say = G.over === 'house' ? `와! <b>${h.name}</b>을 마련했어! 꾸준히 모은 덕분이야.`
+    : G.over === 'broke' ? '앗, 코인을 거의 다 잃었어. 어디서 잃었는지 같이 돌아보고 다시 해 보자!'
+    : `10년이 지났어! 처음 ${fmt(G0.START)}코인과 월급으로 시작해서 재산이 <b>${fmt(w.total)}코인</b>이 됐어.`;
+  return stage(G.over === 'broke' ? 'worry' : 'cheer', say) + `<div class="panel"><h2>결산</h2>
+    <div class="kv"><span>받은 돈 (처음 + 월급)</span><b>${fmt(G0.START + (G.paid || 0))}</b></div>
+    <div class="kv"><span>남은 재산</span><b>${fmt(w.total)}</b></div>
+    <div class="kv"><span>가방에 산 물건</span><b>${G.bag.length}개</b></div>
+    <div class="kv"><span>내 최고 재산 기록</span><b>${fmt(Math.max(best, w.total))}</b></div>
+    <div class="row end"><button class="btn" data-a="new">새 게임</button></div></div>`;
+}
+
+/* ---------- 창(시트) ---------- */
+function sheetView(){
+  const s = S.sheet;
+  if (!s && !(G && (G.modal || S.rest) && S.view === 'game')) return '';
+  let html;
+  if (!s && S.rest) html = `<h2>⏰ 한 시간 동안 게임했어요</h2>
+    <p style="margin:0"><b>과도한 게임이용은 정상적인 일상생활에 지장을 줄 수 있습니다.</b></p>
+    <p style="margin:0">눈을 감고 쉬거나, 일어나서 몸을 쭉 펴 봐. 게임은 저장돼 있으니 나중에 이어서 할 수 있어!</p>
+    <div class="row end"><button class="btn ghost" data-a="rest" data-v="go">조금만 더</button><button class="btn" data-a="rest" data-v="stop">쉬었다 할게</button></div>`;
+  else if (s && s.type === 'term') html = `<div class="row"><h2>${s.t}</h2><button class="btn sm ghost x" data-a="close">닫기</button></div><p style="margin:0">${GLOSS[s.t]}</p>`;
+  else if (s && s.type === 'co') html = coSheet(byId(s.id));
+  else html = payView();
+  return `<div class="scrim" data-a="${s ? 'close' : ''}"><div class="sheet" role="dialog" aria-modal="true">${T(html)}</div></div>`;
+}
+function spark(id){
+  const a = G.h[id], lo = Math.min(...a), hi = Math.max(...a), W = 300, H = 90;
+  const pts = a.map((v, i) => `${(i / Math.max(1, a.length - 1) * W).toFixed(1)},${(H - 6 - (v - lo) / Math.max(1e-9, hi - lo) * (H - 12)).toFixed(1)}`).join(' ');
+  const col = a[a.length - 1] >= a[0] ? 'var(--up)' : 'var(--down)';
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="최근 가격 그래프"><polyline class="ln" points="${pts}" stroke="${col}"/></svg>`;
+}
+function coSheet(x){
+  const p = G.p[x.id], mine = G.hold[x.id], ch = p / G.pm[x.id] - 1;
+  const max = Math.floor(G.cash / p), q = S.qty;
+  const info = x.sec === 'ETF' ? `<p style="margin:0"><b>무엇이 들었나요?</b> ${x.does} (${x.prod})</p>`
+    : `<p style="margin:0"><b>무슨 일을 하나요?</b> ${x.does}</p><p style="margin:0"><b>대표 제품·서비스</b> ${x.prod}</p>`;
+  return `<div class="row"><h2>${x.name}</h2><button class="btn sm ghost x" data-a="close">닫기</button></div>
+    <p class="small" style="margin:-8px 0 0">${SECTORS[x.sec] || '🧺'} ${x.sec}</p>${info}
+    ${spark(x.id)}<p class="small" style="margin:-6px 0 0">최근 석 달 움직임</p>
+    <div class="row between"><span class="total">${fmtP(p)}코인</span><span class="${ud(ch)}">이번 달 ${pct(ch)}</span></div>
+    ${mine ? `<div class="kv"><span>내가 가진 것</span><b>${mine.q}주 (산 값 ${fmt(mine.cost)} → 지금 ${fmt(mine.q * p)}, <span class="${ud(mine.q * p / mine.cost - 1)}">${pct(mine.q * p / mine.cost - 1)}</span>)</b></div>` : ''}
+    <div class="row between"><div class="step"><button data-a="qty" data-v="-1" aria-label="하나 빼기">−</button><output>${q}</output><button data-a="qty" data-v="1" aria-label="하나 더">＋</button></div>
+      <span class="small">${q}주 = ${fmt(q * p)}코인 · 지갑 ${fmt(G.cash)}</span></div>
+    <div class="row end"><button class="btn sky" data-a="sell" data-id="${x.id}" ${mine && mine.q >= q ? '' : 'disabled'}>팔기</button>
+      <button class="btn" data-a="buy" data-id="${x.id}" ${q <= max ? '' : 'disabled'}>사기</button></div>
+    <p class="fake">가격은 게임용 가짜예요. 시간은 이 창을 닫으면 다시 흘러요.</p>`;
+}
+function payView(){
+  const m = G.modal, w = G0.SALARY, save = Math.round(w * m.rate / 100);
+  const rates = [0, 10, 20, 30, 50, 70, 100].map(r => `<button class="chip ${m.rate === r ? 'on' : ''}" data-a="rate" data-v="${r}">${r}%</button>`).join('');
+  return `<h2>💸 ${m.first ? `게임 시작! 첫 [[월급]]날이에요` : `${ym(G.month)} [[월급]]날이에요!`}</h2>
+    ${m.first ? `<p style="margin:0">처음 받은 돈 ${fmt(G0.START)}코인은 지갑에 넣어 뒀어.</p>` : ''}
+    ${(m.note || []).map(n => `<p class="small" style="margin:0">• ${n}</p>`).join('')}
+    <p class="q">월급 ${w}코인 가운데 몇 %를 [[저축]]할까?</p><div class="rates">${rates}</div>
+    <div class="kv"><span>🐷 저금통장으로</span><b>${save}코인</b></div><div class="kv"><span>👛 지갑으로</span><b>${w - save}코인</b></div>
+    <div class="row end"><button class="btn ghost" data-a="payok" data-auto="1">앞으로도 이 비율로 (자동)</button><button class="btn" data-a="payok">정했어!</button></div>`;
+}
+
+/* ---------- 그리기 ---------- */
+function nav(){
+  if (S.view === 'game' && G && !G.over && has('game')){
+    const t = [['market','📈','시장',has('stock')],['wallet','👛','지갑',true],['shop','🏪','상점',has('shop')],['bag','🎒','가방',has('shop')]];
+    return `<nav class="nav">${t.map(([v, ic, n, ok]) => `<button class="${S.tab === v ? 'on' : ''}" data-a="gtab" data-v="${v}" aria-disabled="${!ok}"><span class="ic">${ok ? ic : '🔒'}</span>${n}</button>`).join('')}
+      <button data-a="tab" data-v="home"><span class="ic">📘</span>배우기</button></nav>`;
+  }
+  const t = [['home','📘','배우기'],['game','🪙','게임'],['dict','🔎','낱말 사전']];
+  return `<nav class="nav">${t.map(([v, ic, n]) => `<button class="${S.view === v || (S.view === 'lesson' && v === 'home') ? 'on' : ''}" data-a="tab" data-v="${v}"><span class="ic">${ic}</span>${n}</button>`).join('')}
+    <a href="../"><span class="ic">🛝</span>놀이터</a></nav>`;
+}
+function header(){
+  return `<div class="top"><a class="brand" href="../">하이놀이터<small>콩콩이 경제교실</small></a><span class="pill">📘 ${done.length} / 10</span></div>`;
+}
+function render(){
+  const y = window.scrollY;
+  const main = { home:homeView, lesson:lessonView, game:gameView, dict:dictView }[S.view]();
+  app.innerHTML = (S.view === 'game' && G && !G.over && has('game') ? '' : header()) + main + nav();
+  layer.innerHTML = sheetView();
+  window.scrollTo(0, y);
+}
+
+/* ---------- 누르기 ---------- */
+function openCourse(i){ S = { ...S, view:'lesson', li:i, phase:'talk', ti:0, sheet:null }; window.scrollTo(0, 0); }
+function startAct(){
+  const t = COURSES[S.li].act.type;
+  Object.assign(S, { phase:'act', r:0, ans:null, tried:[], mood:'happy', say:t === 'ox' ? '맞으면 <b>O</b>, 틀리면 <b>X</b>를 눌러 봐!' : '알맞은 것을 골라 봐!' });
+}
+function answer(ok, why, extra){
+  S.ans = { ok, ...extra }; S.mood = ok ? 'cheer' : 'worry'; S.say = why;
+}
+function trade(id, buy){
+  const p = G.p[id], q = S.qty, x = G.hold[id];
+  if (buy){
+    if (G.cash < p * q) return;
+    G.cash -= p * q;
+    G.hold[id] = x ? { q:x.q + q, cost:x.cost + p * q } : { q, cost:p * q };
+  } else {
+    if (!x || x.q < q) return;
+    const c = x.cost * q / x.q;
+    G.cash += p * q; G.realized += p * q - c;
+    if (x.q === q) delete G.hold[id]; else G.hold[id] = { q:x.q - q, cost:x.cost - c };
+  }
+  saveG();
+}
+const ACTIONS = {
+  tab(b){ S.view = b.dataset.v; S.sheet = null; if (S.view === 'game' && G && !G.over) S.paused = true; window.scrollTo(0, 0); },
+  open(b){ openCourse(+b.dataset.i); },
+  next(){ S.ti++; }, prev(){ S.ti--; }, act(){ startAct(); },
+  ox(b){
+    if (S.ans && S.ans.ok) return;
+    const it = COURSES[S.li].act.items[S.r], v = b.dataset.v === '1';
+    answer(v === it.a, v === it.a ? it.why : '다시 생각해 봐! ' + it.why, { v });
+  },
+  pick(b){
+    const it = COURSES[S.li].act.items[S.r], k = +b.dataset.k, o = it.options[k];
+    if (S.ans && S.ans.ok) return;
+    if (!o.ok && !S.tried.includes(k)) S.tried.push(k);
+    answer(o.ok, o.why, { k });
+  },
+  round(){ S.r++; S.ans = null; S.tried = []; S.mood = 'happy'; S.say = '다음 문제야!'; },
+  finish(){
+    if (!done.includes(S.li)) done.push(S.li);
+    store(K.done, done); S.phase = 'done';
+    if (done.length >= 10 && !load('hi-econ-cert', '')) store('hi-econ-cert', new Date().toLocaleDateString('ko-KR'));
+  },
+  term(b){ S.sheet = { type:'term', t:b.dataset.t }; },
+  close(b, e){ if (e.target.closest('.sheet') && !e.target.closest('[data-a="close"].btn')) return; S.sheet = null; },
+  new(){ newGame(); S.tab = 'wallet'; S.filter = '전체'; },
+  pause(){ S.paused = !S.paused; },
+  gtab(b){ if (b.getAttribute('aria-disabled') === 'true') return; S.tab = b.dataset.v; window.scrollTo(0, 0); },
+  filter(b){ S.filter = b.dataset.v; },
+  co(b){ S.sheet = { type:'co', id:b.dataset.id }; S.qty = 1; },
+  qty(b){ S.qty = Math.max(1, S.qty + +b.dataset.v); },
+  buy(b){ trade(b.dataset.id, true); },
+  sell(b){ trade(b.dataset.id, false); },
+  rate(b){ G.modal.rate = +b.dataset.v; },
+  auto(){ G.auto = false; G.note = null; saveG(); },
+  rest(b){ S.rest = false; S.paused = b.dataset.v === 'stop'; },
+  payok(b){
+    G.auto = b.dataset.auto === '1';
+    const r = G.modal.rate, save = Math.round(G0.SALARY * r / 100);
+    G.rate = r; G.bank += save; G.cash += G0.SALARY - save; G.paid = (G.paid || 0) + G0.SALARY; G.modal = null; S.paused = false; saveG();
+  },
+  dep(b){ const v = b.dataset.v === 'all' ? G.cash : Math.min(+b.dataset.v, G.cash); G.cash -= v; G.bank += v; saveG(); },
+  wd(b){ const v = b.dataset.v === 'all' ? G.bank : Math.min(+b.dataset.v, G.bank); G.bank -= v; G.cash += v; saveG(); },
+  bond(b){ if (G.cash < G0.UNIT) return; G.cash -= G0.UNIT; G.bonds.push({ kind:b.dataset.k, amt:G0.UNIT, left:G0.BOND_M }); saveG(); },
+  buyitem(b){ const s = SHOP.find(x => x.id === b.dataset.id); if (G.cash < s.price) return; G.cash -= s.price; G.bag.push({ id:s.id, m:Math.min(G.month, G0.MONTHS) }); saveG(); },
+  house(b){
+    const h = HOUSES.find(x => x.id === b.dataset.id); if (G.cash < h.price || G.bag.some(x => x.id === h.id)) return;
+    G.cash -= h.price; G.house = h.id; G.bag.push({ id:h.id, m:Math.min(G.month, G0.MONTHS) });
+    if (!homes.includes(h.id)){ homes.push(h.id); store(K.homes, homes); }
+    if (h.id === HOUSES[HOUSES.length - 1].id) endGame('house'); else saveG();
+  },
+};
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-a]');
+  if (!b || !b.dataset.a || !ACTIONS[b.dataset.a]) return;
+  if (b.tagName === 'A') return;
+  ACTIONS[b.dataset.a](b, e);
+  render();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.sheet){ S.sheet = null; render(); } });
+
+if (location.hash === '#game') S.view = 'game';
+render();
+</script>
+</body>
+</html>

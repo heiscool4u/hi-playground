@@ -59,6 +59,7 @@ button{font:inherit;color:inherit}
 .score svg{width:20px;height:20px}
 .back{background:none;border:0;cursor:pointer;font-family:var(--display);font-size:18px;color:var(--muted);padding:6px 0}
 
+a.door{text-decoration:none;color:inherit}
 /* 무대: 콩콩이 + 말풍선 */
 .stage{display:grid;grid-template-columns:104px minmax(0,1fr);gap:10px;align-items:end}
 .bot{width:104px;height:auto;animation:bob 2.6s ease-in-out infinite}
@@ -188,6 +189,7 @@ textarea{width:100%;box-sizing:border-box;min-height:110px;border:2px solid var(
 @keyframes blink{50%{opacity:.35}}
 @media (prefers-reduced-motion:reduce){.gold .b-light{animation:none}}
 .door.lab .ic{background:var(--bg);font-size:36px}
+.door.econ .ic{background:var(--sun-soft);font-size:36px}
 .lastgame b{font-family:var(--display);font-weight:400;color:var(--coral-deep)}
 
 /* 메뉴: 폰은 화면 아래 고정, 넓은 화면은 머리줄 아래 */
@@ -1135,7 +1137,9 @@ function entry(next){
   const w = labNow().week, fresh = w && !stamps.includes(w.id);
   const lab = `<button class="door lab" data-a="tab" data-v="lab">
       <span class="ic">🧪</span><span class="tx"><b>실험실</b><small>${fresh ? `새 도전: ${w.title}` : '이번 주 도전 · 이달의 실험'}</small></span><span class="go">▶</span></button>`;
-  return stage(allDone ? 'cheer' : 'happy', say) + `<div class="doors">${allDone ? play + lab + learn : learn + lab + play}${last}</div>`;
+  const econ = `<a class="door econ" href="econ/">
+      <span class="ic">🪙</span><span class="tx"><b>경제교실</b><small>월급·저축·주식 배우고 내 집 마련 게임</small></span><span class="go">▶</span></a>`;
+  return stage(allDone ? 'cheer' : 'happy', say) + `<div class="doors">${allDone ? play + lab + econ + learn : learn + lab + econ + play}${last}</div>`;
 }
 function go(v){
   if (!VIEWS.includes(v)) v = 'entry';
