@@ -581,8 +581,8 @@ const BONDS = {
   gov:{ name:'나라 채권(국채)', rate:0.004, risk:0, why:'나라에 빌려줘요. 매달 이자 0.4%(게임용), 아주 안전해요.' },
   corp:{ name:'회사 채권(회사채)', rate:0.007, risk:0.002, why:'회사에 빌려줘요. 매달 이자 0.7%(게임용), 대신 아주 가끔 못 돌려받을 수 있어요.' },
 };
-// 30초 = 한 달(하루 1초), 120달 = 10년 = 놀이 시간 1시간
-const G0 = { START:1000, SALARY:200, MONTHS:120, DAYS:30, TICK:1000, BANK:0.003, UNIT:100, BOND_M:12, REST:3600 };
+// 3분 = 한 달(하루 6초), 120달 = 10년 = 놀이 시간 약 6시간
+const G0 = { START:1000, SALARY:200, MONTHS:120, DAYS:30, TICK:6000, BANK:0.003, UNIT:100, BOND_M:12, REST:3600 };
 const ym = m => `${Math.floor((m - 1) / 12) + 1}년 ${(m - 1) % 12 + 1}월`;
 
 /* ---------- 저장 ---------- */
@@ -747,7 +747,7 @@ function dictView(){
 /* ---------- 화면: 게임 ---------- */
 function gameView(){
   if (!has('game')) return stage('think', '게임은 <b>코스 2개</b>를 들으면 열려. 먼저 [[월급]]과 [[저축]]을 배우자!') + '<div class="row end"><button class="btn" data-a="tab" data-v="home">코스 들으러 가기</button></div>';
-  if (!G) return stage('cheer', `게임에서는 <b>30초가 한 달</b>이야. 처음에 ${fmt(G0.START)}코인을 받고, 매달 [[월급]] ${G0.SALARY}코인이 들어와. 최대 <b>10년</b>(약 1시간) 동안 모으고 불려서 <b>마당 있는 집</b>까지 가 봐! 중간에 꺼도 이어서 할 수 있어.`) +
+  if (!G) return stage('cheer', `게임에서는 <b>3분이 한 달</b>이야. 처음에 ${fmt(G0.START)}코인을 받고, 매달 [[월급]] ${G0.SALARY}코인이 들어와. 최대 <b>10년</b>(약 6시간) 동안 모으고 불려서 <b>마당 있는 집</b>까지 가 봐! 중간에 꺼도 이어서 할 수 있어.`) +
     `<div class="row end"><button class="btn" data-a="new">게임 시작</button></div>`;
   if (G.over) return resultView();
   const w = worth(), mon = Math.min(G.month, G0.MONTHS);
