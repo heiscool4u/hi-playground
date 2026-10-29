@@ -1111,7 +1111,7 @@ function labHTML(){
     ${soon ? `<p class="small">다음 도전은 <b>${d.getMonth() + 1}월 ${d.getDate()}일</b>에 열려요.</p>` : ''}</div>
     <section class="arcade"><h2>도장판</h2>
       <div class="stamps">${Array.from({length:slots}, (_, k) => `<i class="${k < n ? 'on' : ''}">${k < n ? '🧪' : ''}</i>`).join('')}</div>
-      <p>${n >= 4 ? '보상: 콩콩이 안테나가 반짝여요!' : `도장 4개를 모으면 콩콩이 안테나가 반짝여요. 지금 <b>${n}</b>개`}</p></section>
+      <p>${n >= 4 ? '보상: 콩콩이 안테나가 반짝여요!' : `도전은 매주 월요일에 하나씩 열려요. 4주 동안 도장 4개를 모으면 콩콩이 안테나가 반짝여요! 지금 <b>${n}</b>개`}</p></section>
     ${past ? `<section class="arcade"><h2>지난 실험실</h2><div class="doors">${past}</div></section>` : ''}`;
 }
 
