@@ -1022,7 +1022,7 @@ function header(){
 function render(){
   const y = window.scrollY;
   const main = { home:homeView, lesson:lessonView, game:gameView, dict:dictView }[S.view]();
-  app.innerHTML = (S.view === 'game' && G && !G.over && has('game') ? '' : header()) + main + nav();
+  app.innerHTML = header() + main + nav();
   layer.innerHTML = sheetView();
   window.scrollTo(0, y);
   const k = app.querySelector('.kk[data-to]');
