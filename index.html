@@ -172,6 +172,7 @@ textarea{width:100%;box-sizing:border-box;min-height:110px;border:2px solid var(
 .labcard.main{border-color:var(--sky);box-shadow:0 5px 0 var(--line)}
 .labcard .tag{flex:none;font-family:var(--display);font-size:15px;padding:4px 10px;border-radius:999px;background:var(--sky);color:var(--sky-ink)}
 .labcard .tx{flex:1;min-width:0}
+.newb{flex:none;display:inline-block;font-family:var(--display);font-size:13px;line-height:1;padding:3px 8px;border-radius:999px;background:var(--coral-deep);color:#fff;vertical-align:middle;margin-left:6px}
 .labcard b{display:block;font-family:var(--display);font-weight:400;font-size:22px;line-height:1.25}
 .labcard small{display:block;font-size:15px;color:var(--muted)}
 .labcard .go{font-family:var(--display);font-size:22px;color:var(--coral-deep)}
@@ -1094,9 +1095,10 @@ function labNow(){
   const soon = LAB.filter(x => x.opens > TODAY).sort((a, b) => a.opens < b.opens ? -1 : 1)[0];
   return { open, week:last('week'), month:last('month'), soon };
 }
+function isNew(x){ return !stamps.includes(x.id) && (new Date(TODAY + 'T00:00') - new Date(x.opens + 'T00:00')) / 864e5 <= 6; }
 function labCard(x, tag, main){
   return `<button class="labcard ${main ? 'main' : ''}" data-a="lab" data-id="${x.id}">
-    <span class="tag">${tag}</span><span class="tx"><b>${x.title}</b><small>${x.sub}</small></span>
+    <span class="tag">${tag}</span><span class="tx"><b>${x.title}${isNew(x) ? '<span class="newb">NEW</span>' : ''}</b><small>${x.sub}</small></span>
     ${stamps.includes(x.id) ? '<span class="ok">도장 ✔</span>' : '<span class="go">▶</span>'}</button>`;
 }
 function labHTML(){
@@ -1107,9 +1109,11 @@ function labHTML(){
   const past = open.filter(x => x !== week && x !== month).reverse()
     .map(x => labCard(x, x.kind === 'month' ? '지난 실험' : '지난 도전')).join('');
   const d = soon && new Date(soon.opens + 'T00:00');
+  const u = open.length && new Date(open[open.length - 1].opens + 'T00:00');
   return stage(n >= 4 ? 'cheer' : 'wow', say) + `<div class="doors">
     ${week ? labCard(week, '이번 주 도전', !stamps.includes(week.id)) : ''}
     ${month ? labCard(month, '이달의 실험', !stamps.includes(month.id)) : ''}
+    ${u ? `<p class="small">마지막 업데이트 <b>${u.getMonth() + 1}월 ${u.getDate()}일</b></p>` : ''}
     ${soon ? `<p class="small">다음 도전은 <b>${d.getMonth() + 1}월 ${d.getDate()}일</b>에 열려요.</p>` : ''}</div>
     <section class="arcade"><h2>도장판</h2>
       <div class="stamps">${Array.from({length:slots}, (_, k) => `<i class="${k < n ? 'on' : ''}">${k < n ? '🧪' : ''}</i>`).join('')}</div>
@@ -1135,11 +1139,13 @@ function entry(next){
   let last = '';
   try { const g = GAMES.find(x => x[0] === localStorage.getItem(LAST_KEY)); if (g) last = `<a class="lastgame" href="games/${g[0]}/index.html" data-g="${g[0]}">지난번에 한 게임 <b>${g[1]}</b> 한 판 더 ▶</a>`; } catch(e){}
   const w = labNow().week, fresh = w && !stamps.includes(w.id);
+  const ln = labNow().open, lu = ln.length && new Date(ln[ln.length - 1].opens + 'T00:00'), pend = ln.filter(isNew).length;
+  const upd = lu ? `<p class="small upd">🧪 실험실 마지막 업데이트 <b>${lu.getMonth() + 1}월 ${lu.getDate()}일</b>${pend ? ` · 아직 안 한 새 도전 <b>${pend}개</b>` : ''}</p>` : '';
   const lab = `<button class="door lab" data-a="tab" data-v="lab">
-      <span class="ic">🧪</span><span class="tx"><b>실험실</b><small>${fresh ? `새 도전: ${w.title}` : '이번 주 도전 · 이달의 실험'}</small></span><span class="go">▶</span></button>`;
+      <span class="ic">🧪</span><span class="tx"><b>실험실${fresh && isNew(w) ? '<span class="newb">NEW</span>' : ''}</b><small>${fresh ? `새 도전: ${w.title}` : '이번 주 도전 · 이달의 실험'}</small></span><span class="go">▶</span></button>`;
   const econ = `<a class="door econ" href="econ/">
       <span class="ic">🪙</span><span class="tx"><b>경제교실</b><small>월급·저축·주식 배우고 내 집 마련 게임</small></span><span class="go">▶</span></a>`;
-  return stage(allDone ? 'cheer' : 'happy', say) + `<div class="doors">${allDone ? play + lab + econ + learn : learn + lab + econ + play}${last}</div>`;
+  return stage(allDone ? 'cheer' : 'happy', say) + `<div class="doors">${allDone ? play + lab + econ + learn : learn + lab + econ + play}${last}</div>${upd}`;
 }
 function go(v){
   if (!VIEWS.includes(v)) v = 'entry';
